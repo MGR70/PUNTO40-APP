@@ -1,0 +1,58 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    text-align: justify;
+}
+
+h1, h2 {
+    color: #333;
+    text-align: center;
+}
+
+div {
+    margin-bottom: 20px;
+}
+
+label {
+    display: inline-block;
+    width: 100px;
+}
+
+input {
+    margin-bottom: 10px;
+    padding: 5px;
+    width: 100%;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ccc;
+}
+
+th, td {
+    padding: 8px;
+    text-align: center;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+#debtMatrices {
+    display: none;
+}
+
+@media only screen and (max-width: 600px) {
+    label {
+        width: auto;
+    }
+
+    h1, h2 {
+        font-size: 1.5em;
+    }
+}
