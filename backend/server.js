@@ -9,10 +9,10 @@ app.use(cors());
 
 // Configuración de la base de datos (reemplaza con tus credenciales de Neon.tech)
 const pool = new Pool({
-    user: 'your-username', // Usuario de Neon.tech
-    host: 'ep-cool-smoke-123456.us-east-2.aws.neon.tech', // Host de Neon.tech
+    user: 'neondb_owner', // Usuario de Neon.tech
+    host: 'ep-broad-bush-a85uxie7-pooler.eastus2.azure.neon.tech', // Host de Neon.tech
     database: 'neondb', // Nombre de la base de datos
-    password: 'your-password', // Contraseña de Neon.tech
+    password: 'npg_RHNaKQD7z4wB', // Contraseña de Neon.tech
     port: 5432, // Puerto de PostgreSQL
 });
 
