@@ -14,6 +14,9 @@ const pool = new Pool({
     database: 'neondb', // Nombre de la base de datos
     password: 'npg_RHNaKQD7z4wB', // Contraseña de Neon.tech
     port: 5432, // Puerto de PostgreSQL
+    ssl: {
+        rejectUnauthorized: false, // Necesario para conexiones SSL
+    },
 });
 
 // Endpoint para registrar un jugador
