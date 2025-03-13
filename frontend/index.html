@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Pantalla de bienvenida -->
     <div id="welcomeScreen">
         <h1>Bienvenidos Punto Cuarenteros</h1>
         <h2>¡A JUGAR!</h2>
@@ -14,7 +15,9 @@
         <button onclick="startGame()">Iniciar juego</button>
     </div>
 
+    <!-- Pantalla del juego -->
     <div id="gameScreen" style="display: none;">
+        <!-- Registro de jugadores -->
         <h2>Registro de jugadores</h2>
         <div>
             <label for="username">Jugador:</label>
@@ -26,6 +29,7 @@
             <ul id="playersList"></ul>
         </div>
 
+        <!-- Registro de deudas -->
         <h2>Registro de cuentas por pagar</h2>
         <div>
             <label for="deudor">Deudor:</label>
@@ -43,9 +47,11 @@
             <button onclick="registerDebt()">Registrar Deuda</button>
         </div>
 
+        <!-- Lista de deudas -->
         <h2>Deudas entre jugadores</h2>
         <ul id="debtList"></ul>
 
+        <!-- Política de privacidad -->
         <h2 id="privacyPolicyTitle" style="display:none;">Política de Privacidad de "Punto 40"</h2>
         <div id="privacyPolicy" style="display:none;">
             <h2>Nuestra Política de Privacidad explica:</h2>
@@ -74,10 +80,12 @@
             <p>Nuestra Política de Privacidad puede cambiar de vez en cuando. No reduciremos sus derechos bajo esta Política de Privacidad sin su consentimiento explícito. También nos aseguraremos de mantener las versiones anteriores de esta Política de Privacidad en un archivo para su revisión.</p>
         </div>
         
+        <!-- Botones de política de privacidad -->
         <button onclick="showPrivacyPolicy()">Política de Privacidad</button>
         <button onclick="hidePrivacyPolicy()" id="backButton" style="display:none;">Regresar</button>
     </div>
 
+    <!-- Script JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
