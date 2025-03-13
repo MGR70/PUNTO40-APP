@@ -6,11 +6,11 @@ export default async function handler(req, res) {
 
         // Configuración de la base de datos (reemplaza con tus credenciales de Neon.tech)
         const pool = new Pool({
-            user: 'neondb_owner',
-            host: 'ep-broad-bush-a85uxie7-pooler.eastus2.azure.neon.tech',
-            database: 'neondb',
-            password: 'npg_RHNaKQD7z4wB',
-            port: 5432,
+            user: process.env.PGUSER,
+            host: process.env.PGHOST,
+            database: process.env.PGDATABASE,
+            password: process.env.PGPASSWORD,
+            port: process.env.PGPORT,
             ssl: {
                 rejectUnauthorized: false,
             },
