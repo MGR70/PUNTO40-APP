@@ -99,12 +99,43 @@ async function updateConsolidatedDebtList() {
         const debts = await response.json();
         debts.forEach(debt => {
             const listItem = document.createElement('li');
-            listItem.innerText = `${debt.deudor} debe a ${debt.ganador}: ${debt.monto}`;
+            listItem.innerText = `${debt.deudor} debe a ${debt.ganador}: $${debt.monto.toFixed(2)}`;
             debtList.appendChild(listItem);
         });
     } catch (error) {
         console.error(error);
         alert('Error al obtener las deudas. Por favor, inténtalo de nuevo.');
+    }
+}
+
+// Función para finalizar el juego
+async function finalizarJuego() {
+    const confirmacion = confirm("¿Estás seguro de que deseas finalizar el juego? Todos los datos se borrarán.");
+    if (confirmacion) {
+        try {
+            // Borrar jugadores y deudas
+            const response = await fetch('/api/finalizarJuego', {
+                method: 'POST',
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al finalizar el juego');
+            }
+
+            // Volver a la pantalla de inicio
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('welcomeScreen').style.display = 'block';
+
+            // Limpiar la lista de jugadores y deudas
+            players = [];
+            debts = {};
+            populatePlayerDropdowns();
+            displayRegisteredPlayers();
+            updateConsolidatedDebtList();
+        } catch (error) {
+            console.error(error);
+            alert('Error al finalizar el juego. Por favor, inténtalo de nuevo.');
+        }
     }
 }
 
