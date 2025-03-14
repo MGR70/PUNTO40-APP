@@ -114,7 +114,7 @@ async function finalizarJuego() {
     if (confirmacion) {
         try {
             // Borrar jugadores y deudas
-            const response = await fetch('/api/finalizarJuego', {
+            const response = await fetch('/api/finalizarjuego', {
                 method: 'POST',
             });
 
