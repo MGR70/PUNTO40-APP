@@ -4,6 +4,9 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { deudor_id, ganador_id, monto } = req.body;
 
+    // Log para verificar la solicitud
+    console.log('Solicitud recibida:', { deudor_id, ganador_id, monto });
+
     try {
       console.log('Conectando a la base de datos...');
       console.log('Registrando deuda:', { deudor_id, ganador_id, monto });
