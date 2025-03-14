@@ -79,6 +79,7 @@ async function registerDebt() {
 
         const data = await response.json();
         updateConsolidatedDebtList();
+        mostrarResumen(); // Actualizar el resumen después de registrar una deuda
     } catch (error) {
         console.error(error);
         alert('Error al registrar la deuda. Por favor, inténtalo de nuevo.');
@@ -108,6 +109,31 @@ async function updateConsolidatedDebtList() {
     }
 }
 
+// Función para obtener y mostrar el resumen de deudas
+async function mostrarResumen() {
+    try {
+        const response = await fetch('/api/resumendeudas');
+        if (!response.ok) {
+            throw new Error('Error al obtener el resumen de deudas');
+        }
+
+        const resumen = await response.json();
+        const resumenContainer = document.getElementById('Deudas entre Jugadores');
+        resumenContainer.innerHTML = '<h2>Resumen de Deudas</h2>'; // Agregar un título
+
+        resumen.forEach(item => {
+            if (item.amount !== 0) {
+                const p = document.createElement('p');
+                p.textContent = `${item.debtor} debe a ${item.creditor}: $${item.amount.toFixed(2)}`;
+                resumenContainer.appendChild(p);
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        alert('Error al obtener el resumen de deudas. Por favor, inténtalo de nuevo.');
+    }
+}
+
 // Función para finalizar el juego
 async function finalizarJuego() {
     const confirmacion = confirm("¿Estás seguro de que deseas finalizar el juego? Todos los datos se borrarán.");
@@ -132,6 +158,7 @@ async function finalizarJuego() {
             populatePlayerDropdowns();
             displayRegisteredPlayers();
             updateConsolidatedDebtList();
+            mostrarResumen(); // Limpiar el resumen
         } catch (error) {
             console.error(error);
             alert('Error al finalizar el juego. Por favor, inténtalo de nuevo.');
@@ -179,6 +206,7 @@ async function loadPlayersAndDebts() {
         populatePlayerDropdowns();
         displayRegisteredPlayers();
         updateConsolidatedDebtList();
+        mostrarResumen(); // Cargar el resumen al inicio
     } catch (error) {
         console.error(error);
         alert('Error al cargar los datos. Por favor, recarga la página.');
