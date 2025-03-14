@@ -10,22 +10,26 @@ async function registerPlayer() {
         return;
     }
 
-    const response = await fetch('/api/registerPlayer', {  // Cambiado a /api/registerPlayer
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre: playerName })
-    });
+    try {
+        const response = await fetch('/api/registerPlayer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nombre: playerName })
+        });
 
-    if (!response.ok) {
+        if (!response.ok) {
+            throw new Error('Error al registrar el jugador');
+        }
+
+        const data = await response.json();
+        players.push(data);
+        populatePlayerDropdowns();
+        displayRegisteredPlayers();
+        document.getElementById('username').value = '';
+    } catch (error) {
+        console.error(error);
         alert('Error al registrar el jugador. Por favor, inténtalo de nuevo.');
-        return;
     }
-
-    const data = await response.json();
-    players.push(data);
-    populatePlayerDropdowns();
-    displayRegisteredPlayers();
-    document.getElementById('username').value = '';
 }
 
 // Función para mostrar los jugadores registrados
@@ -62,19 +66,23 @@ async function registerDebt() {
         return;
     }
 
-    const response = await fetch('/api/registerDebt', {  // Cambiado a /api/registerDebt
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deudor_id: deudor, ganador_id: ganador, monto: amount })
-    });
+    try {
+        const response = await fetch('/api/registerDebt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ deudor_id: deudor, ganador_id: ganador, monto: amount })
+        });
 
-    if (!response.ok) {
+        if (!response.ok) {
+            throw new Error('Error al registrar la deuda');
+        }
+
+        const data = await response.json();
+        updateConsolidatedDebtList();
+    } catch (error) {
+        console.error(error);
         alert('Error al registrar la deuda. Por favor, inténtalo de nuevo.');
-        return;
     }
-
-    const data = await response.json();
-    updateConsolidatedDebtList();
 }
 
 // Función para actualizar la lista de deudas
@@ -82,18 +90,22 @@ async function updateConsolidatedDebtList() {
     const debtList = document.getElementById('debtList');
     debtList.innerHTML = '';
 
-    const response = await fetch('/api/debts');  // Cambiado a /api/debts
-    if (!response.ok) {
-        alert('Error al obtener las deudas. Por favor, inténtalo de nuevo.');
-        return;
-    }
+    try {
+        const response = await fetch('/api/debts');
+        if (!response.ok) {
+            throw new Error('Error al obtener las deudas');
+        }
 
-    const debts = await response.json();
-    debts.forEach(debt => {
-        const listItem = document.createElement('li');
-        listItem.innerText = `${debt.deudor} debe a ${debt.ganador}: ${debt.monto}`;
-        debtList.appendChild(listItem);
-    });
+        const debts = await response.json();
+        debts.forEach(debt => {
+            const listItem = document.createElement('li');
+            listItem.innerText = `${debt.deudor} debe a ${debt.ganador}: ${debt.monto}`;
+            debtList.appendChild(listItem);
+        });
+    } catch (error) {
+        console.error(error);
+        alert('Error al obtener las deudas. Por favor, inténtalo de nuevo.');
+    }
 }
 
 // Función para mostrar la política de privacidad
@@ -119,14 +131,14 @@ function startGame() {
 // Cargar jugadores y deudas al iniciar
 async function loadPlayersAndDebts() {
     try {
-        const playersResponse = await fetch('/api/players');  // Cambiado a /api/players
+        const playersResponse = await fetch('/api/players');
         if (!playersResponse.ok) {
             throw new Error('Error al cargar los jugadores');
         }
         const playersData = await playersResponse.json();
         players = playersData;
 
-        const debtsResponse = await fetch('/api/debts');  // Cambiado a /api/debts
+        const debtsResponse = await fetch('/api/debts');
         if (!debtsResponse.ok) {
             throw new Error('Error al cargar las deudas');
         }
@@ -142,4 +154,5 @@ async function loadPlayersAndDebts() {
     }
 }
 
-loadPlayersAndDebts();
+// Cargar jugadores y deudas cuando la página se carga
+window.onload = loadPlayersAndDebts;
