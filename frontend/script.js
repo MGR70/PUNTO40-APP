@@ -95,12 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             players.forEach(winner => {
                 const cell = document.createElement('td');
-                if (debtor === winner) {
-                    cell.textContent = '-';
-                } else {
-                    const netDebt = summary[debtor] && summary[debtor][winner] ? summary[debtor][winner] : 0;
-                    cell.textContent = netDebt > 0 ? netDebt : '';
-                }
+                const amount = summary[debtor] && summary[debtor][winner] ? summary[debtor][winner] : 0;
+                cell.textContent = amount;
                 row.appendChild(cell);
             });
 
@@ -111,46 +107,37 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateDebtSummary() {
         const summary = {};
 
-        // Inicializar la matriz de deudas
-        players.forEach(debtor => {
-            summary[debtor] = {};
-            players.forEach(winner => {
-                if (debtor !== winner) {
-                    summary[debtor][winner] = 0;
-                }
-            });
-        });
-
-        // Calcular las deudas brutas
         debts.forEach(debt => {
-            if (summary[debt.debtor] && summary[debt.debtor][debt.winner]) {
-                summary[debt.debtor][debt.winner] += debt.amount;
+            if (!summary[debt.debtor]) {
+                summary[debt.debtor] = {};
             }
+            if (!summary[debt.debtor][debt.winner]) {
+                summary[debt.debtor][debt.winner] = 0;
+            }
+            summary[debt.debtor][debt.winner] += debt.amount;
         });
 
-        // Calcular las deudas netas
         players.forEach(debtor => {
             players.forEach(winner => {
                 if (debtor !== winner) {
-                    const debtorToWinner = summary[debtor][winner] || 0;
-                    const winnerToDebtor = summary[winner][debtor] || 0;
+                    const debtorToWinner = summary[debtor] && summary[debtor][winner] ? summary[debtor][winner] : 0;
+                    const winnerToDebtor = summary[winner] && summary[winner][debtor] ? summary[winner][debtor] : 0;
+                    const netDebt = debtorToWinner - winnerToDebtor;
 
-                    if (debtorToWinner > winnerToDebtor) {
-                        summary[debtor][winner] = debtorToWinner - winnerToDebtor;
-                        summary[winner][debtor] = 0; // Limpiar la dirección opuesta
-                    } else if (winnerToDebtor > debtorToWinner) {
-                        summary[winner][debtor] = winnerToDebtor - debtorToWinner;
-                        summary[debtor][winner] = 0; // Limpiar la dirección opuesta
-                    } else {
-                        summary[debtor][winner] = 0;
-                        summary[winner][debtor] = 0;
+                    if (netDebt > 0) {
+                        if (!summary[debtor]) {
+                            summary[debtor] = {};
+                        }
+                        summary[debtor][winner] = netDebt;
+                    } else if (netDebt < 0) {
+                        if (!summary[winner]) {
+                            summary[winner] = {};
+                        }
+                        summary[winner][debtor] = -netDebt;
                     }
                 }
             });
         });
-
-        // Depuración: Mostrar el resumen en la consola
-        console.log('Resumen de deudas:', summary);
 
         return summary;
     }
