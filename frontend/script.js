@@ -137,10 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (debtorToWinner > winnerToDebtor) {
                         summary[debtor][winner] = debtorToWinner - winnerToDebtor;
-                        summary[winner][debtor] = 0; // Asegurarse de que no haya deuda en la dirección opuesta
+                        summary[winner][debtor] = 0; // Limpiar la dirección opuesta
                     } else if (winnerToDebtor > debtorToWinner) {
                         summary[winner][debtor] = winnerToDebtor - debtorToWinner;
-                        summary[debtor][winner] = 0; // Asegurarse de que no haya deuda en la dirección opuesta
+                        summary[debtor][winner] = 0; // Limpiar la dirección opuesta
                     } else {
                         summary[debtor][winner] = 0;
                         summary[winner][debtor] = 0;
