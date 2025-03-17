@@ -1,229 +1,144 @@
-let players = [];
-let debts = {};
+document.addEventListener('DOMContentLoaded', () => {
+    const welcomePage = document.getElementById('welcome-page');
+    const gamePage = document.getElementById('game-page');
+    const startGameButton = document.getElementById('start-game');
+    const registerPlayerButton = document.getElementById('register-player');
+    const registerDebtButton = document.getElementById('register-debt');
+    const endGameButton = document.getElementById('end-game');
+    const playerNameInput = document.getElementById('player-name');
+    const playerList = document.getElementById('player-list');
+    const debtorSelect = document.getElementById('debtor');
+    const winnerSelect = document.getElementById('winner');
+    const debtAmountInput = document.getElementById('debt-amount');
+    const debtMatrix = document.getElementById('debt-matrix');
 
-// Función para registrar un jugador
-async function registerPlayer() {
-    const playerName = document.getElementById('username').value;
+    let players = [];
+    let debts = [];
 
-    if (!playerName) {
-        alert('Por favor, ingrese un nombre de jugador válido.');
-        return;
-    }
-
-    try {
-        console.log('Registrando jugador:', playerName);
-        const response = await fetch('/api/registerPlayer', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nombre: playerName })
-        });
-
-        if (!response.ok) {
-            throw new Error('Error al registrar el jugador');
-        }
-
-        const data = await response.json();
-        console.log('Jugador registrado:', data);
-        players.push(data);
-        populatePlayerDropdowns();
-        displayRegisteredPlayers();
-        document.getElementById('username').value = '';
-    } catch (error) {
-        console.error('Error al registrar el jugador:', error);
-        alert('Error al registrar el jugador. Por favor, inténtalo de nuevo.');
-    }
-}
-
-// Función para mostrar los jugadores registrados
-function displayRegisteredPlayers() {
-    const playersList = document.getElementById('playersList');
-    playersList.innerHTML = '';
-
-    players.forEach(player => {
-        const listItem = document.createElement('li');
-        listItem.innerText = player.nombre;
-        playersList.appendChild(listItem);
+    startGameButton.addEventListener('click', () => {
+        welcomePage.style.display = 'none';
+        gamePage.style.display = 'block';
     });
-}
 
-// Función para llenar los dropdowns de deudor y ganador
-function populatePlayerDropdowns() {
-    const playerDropdowns = document.querySelectorAll('#deudor, #ganador');
-    playerDropdowns.forEach(select => {
-        select.innerHTML = '<option value="">Seleccionar jugador</option>';
+    registerPlayerButton.addEventListener('click', () => {
+        const playerName = playerNameInput.value.trim();
+        if (playerName && !players.includes(playerName)) {
+            players.push(playerName);
+            updatePlayerList();
+            updateSelectOptions();
+            playerNameInput.value = '';
+        }
+    });
+
+    registerDebtButton.addEventListener('click', () => {
+        const debtor = debtorSelect.value;
+        const winner = winnerSelect.value;
+        const amount = parseFloat(debtAmountInput.value);
+
+        if (debtor && winner && amount > 0) {
+            debts.push({ debtor, winner, amount });
+            updateDebtSummary();
+            debtAmountInput.value = '';
+        }
+    });
+
+    endGameButton.addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que deseas finalizar el juego?')) {
+            players = [];
+            debts = [];
+            updatePlayerList();
+            updateDebtSummary();
+            welcomePage.style.display = 'block';
+            gamePage.style.display = 'none';
+        }
+    });
+
+    function updatePlayerList() {
+        playerList.innerHTML = '';
         players.forEach(player => {
-            select.innerHTML += `<option value="${player.id}">${player.nombre}</option>`;
+            const li = document.createElement('li');
+            li.textContent = player;
+            playerList.appendChild(li);
         });
-    });
-}
-
-// Función para registrar una deuda
-async function registerDebt() {
-    const deudor = document.getElementById('deudor').value;
-    const ganador = document.getElementById('ganador').value;
-    const amount = parseFloat(document.getElementById('amount').value);
-
-    if (!deudor || !ganador || isNaN(amount) || amount === 0) {
-        alert('Por favor, complete todos los campos y asegúrese de ingresar un monto válido.');
-        return;
     }
 
-    try {
-        console.log('Registrando deuda:', { deudor, ganador, amount });
-        const response = await fetch('/api/registerDebt', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ deudor_id: deudor, ganador_id: ganador, monto: amount })
+    function updateSelectOptions() {
+        debtorSelect.innerHTML = '';
+        winnerSelect.innerHTML = '';
+        players.forEach(player => {
+            const option = document.createElement('option');
+            option.value = player;
+            option.textContent = player;
+            debtorSelect.appendChild(option.cloneNode(true));
+            winnerSelect.appendChild(option);
         });
-
-        if (!response.ok) {
-            throw new Error('Error al registrar la deuda');
-        }
-
-        const data = await response.json();
-        console.log('Deuda registrada:', data);
-        updateConsolidatedDebtList();
-        mostrarResumen(); // Actualizar el resumen después de registrar una deuda
-    } catch (error) {
-        console.error('Error al registrar la deuda:', error);
-        alert('Error al registrar la deuda. Por favor, inténtalo de nuevo.');
     }
-}
 
-// Función para actualizar la lista de deudas
-async function updateConsolidatedDebtList() {
-    const debtList = document.getElementById('debtList');
-    debtList.innerHTML = '';
+    function updateDebtSummary() {
+        const summary = calculateDebtSummary();
+        debtMatrix.innerHTML = '';
 
-    try {
-        console.log('Cargando deudas...');
-        const response = await fetch('/api/debts');
-        if (!response.ok) {
-            throw new Error('Error al obtener las deudas');
-        }
-
-        const debts = await response.json();
-        console.log('Deudas cargadas:', debts);
-        debts.forEach(debt => {
-            const listItem = document.createElement('li');
-            listItem.innerText = `${debt.deudor} debe a ${debt.ganador}: $${debt.monto.toFixed(2)}`;
-            debtList.appendChild(listItem);
+        const headerRow = document.createElement('tr');
+        headerRow.appendChild(document.createElement('th'));
+        players.forEach(player => {
+            const th = document.createElement('th');
+            th.textContent = player;
+            headerRow.appendChild(th);
         });
-    } catch (error) {
-        console.error('Error al obtener las deudas:', error);
-        alert('Error al obtener las deudas. Por favor, inténtalo de nuevo.');
-    }
-}
+        debtMatrix.appendChild(headerRow);
 
-// Función para obtener y mostrar el resumen de deudas
-async function mostrarResumen() {
-    try {
-        console.log('Cargando resumen de deudas...');
-        const response = await fetch('/api/resumendeudas');
-        if (!response.ok) {
-            throw new Error('Error al obtener el resumen de deudas');
-        }
+        players.forEach(debtor => {
+            const row = document.createElement('tr');
+            const debtorHeader = document.createElement('th');
+            debtorHeader.textContent = debtor;
+            row.appendChild(debtorHeader);
 
-        const resumen = await response.json();
-        console.log('Resumen de deudas:', resumen);
-        const resumenContainer = document.getElementById('Deudas entre Jugadores');
-        resumenContainer.innerHTML = '<h2>Resumen de Deudas</h2>'; // Agregar un título
-
-        resumen.forEach(item => {
-            if (item.amount !== 0) {
-                const p = document.createElement('p');
-                p.textContent = `${item.debtor} debe a ${item.creditor}: $${item.amount.toFixed(2)}`;
-                resumenContainer.appendChild(p);
-            }
-        });
-    } catch (error) {
-        console.error('Error al obtener el resumen de deudas:', error);
-        alert('Error al obtener el resumen de deudas. Por favor, inténtalo de nuevo.');
-    }
-}
-
-// Función para finalizar el juego
-async function finalizarJuego() {
-    const confirmacion = confirm("¿Estás seguro de que deseas finalizar el juego? Todos los datos se borrarán.");
-    if (confirmacion) {
-        try {
-            console.log('Finalizando juego...');
-            const response = await fetch('/api/finalizarjuego', {
-                method: 'POST',
+            players.forEach(winner => {
+                const cell = document.createElement('td');
+                const amount = summary[debtor] && summary[debtor][winner] ? summary[debtor][winner] : 0;
+                cell.textContent = amount;
+                row.appendChild(cell);
             });
 
-            if (!response.ok) {
-                throw new Error('Error al finalizar el juego');
+            debtMatrix.appendChild(row);
+        });
+    }
+
+    function calculateDebtSummary() {
+        const summary = {};
+
+        debts.forEach(debt => {
+            if (!summary[debt.debtor]) {
+                summary[debt.debtor] = {};
             }
+            if (!summary[debt.debtor][debt.winner]) {
+                summary[debt.debtor][debt.winner] = 0;
+            }
+            summary[debt.debtor][debt.winner] += debt.amount;
+        });
 
-            console.log('Juego finalizado correctamente');
-            // Volver a la pantalla de inicio
-            document.getElementById('gameScreen').style.display = 'none';
-            document.getElementById('welcomeScreen').style.display = 'block';
+        players.forEach(debtor => {
+            players.forEach(winner => {
+                if (debtor !== winner) {
+                    const debtorToWinner = summary[debtor] && summary[debtor][winner] ? summary[debtor][winner] : 0;
+                    const winnerToDebtor = summary[winner] && summary[winner][debtor] ? summary[winner][debtor] : 0;
+                    const netDebt = debtorToWinner - winnerToDebtor;
 
-            // Limpiar la lista de jugadores y deudas
-            players = [];
-            debts = {};
-            populatePlayerDropdowns();
-            displayRegisteredPlayers();
-            updateConsolidatedDebtList();
-            mostrarResumen(); // Limpiar el resumen
-        } catch (error) {
-            console.error('Error al finalizar el juego:', error);
-            alert('Error al finalizar el juego. Por favor, inténtalo de nuevo.');
-        }
+                    if (netDebt > 0) {
+                        if (!summary[debtor]) {
+                            summary[debtor] = {};
+                        }
+                        summary[debtor][winner] = netDebt;
+                    } else if (netDebt < 0) {
+                        if (!summary[winner]) {
+                            summary[winner] = {};
+                        }
+                        summary[winner][debtor] = -netDebt;
+                    }
+                }
+            });
+        });
+
+        return summary;
     }
-}
-
-// Función para mostrar la política de privacidad
-function showPrivacyPolicy() {
-    document.getElementById('privacyPolicy').style.display = 'block';
-    document.getElementById('privacyPolicyTitle').style.display = 'block';
-    document.getElementById('backButton').style.display = 'block';
-}
-
-// Función para ocultar la política de privacidad
-function hidePrivacyPolicy() {
-    document.getElementById('privacyPolicy').style.display = 'none';
-    document.getElementById('privacyPolicyTitle').style.display = 'none';
-    document.getElementById('backButton').style.display = 'none';
-}
-
-// Función para iniciar el juego
-function startGame() {
-    document.getElementById('welcomeScreen').style.display = 'none';
-    document.getElementById('gameScreen').style.display = 'block';
-}
-
-// Cargar jugadores y deudas al iniciar
-async function loadPlayersAndDebts() {
-    try {
-        console.log('Cargando jugadores y deudas...');
-        const playersResponse = await fetch('/api/players');
-        if (!playersResponse.ok) {
-            throw new Error('Error al cargar los jugadores');
-        }
-        const playersData = await playersResponse.json();
-        console.log('Jugadores cargados:', playersData);
-        players = playersData;
-
-        const debtsResponse = await fetch('/api/debts');
-        if (!debtsResponse.ok) {
-            throw new Error('Error al cargar las deudas');
-        }
-        const debtsData = await debtsResponse.json();
-        console.log('Deudas cargadas:', debtsData);
-        debts = debtsData;
-
-        populatePlayerDropdowns();
-        displayRegisteredPlayers();
-        updateConsolidatedDebtList();
-        mostrarResumen(); // Cargar el resumen al inicio
-    } catch (error) {
-        console.error('Error al cargar los datos:', error);
-        alert('Error al cargar los datos. Por favor, recarga la página.');
-    }
-}
-
-// Cargar jugadores y deudas cuando la página se carga
-window.onload = loadPlayersAndDebts;
+});
