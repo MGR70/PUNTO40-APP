@@ -95,11 +95,11 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDebtMatrix();
     }
 
-    // Calcular deudas netas
+    // Calcular deudas netas en una sola dirección
     function calculateDebtSummary() {
         summary = {}; // Reiniciar el resumen
 
-        // Calcular las deudas brutas
+        // Calcular las deudas brutas en una sola dirección (deudor → ganador)
         debts.forEach(debt => {
             if (!summary[debt.debtor]) {
                 summary[debt.debtor] = {};
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
             summary[debt.debtor][debt.winner] += debt.amount;
         });
 
-        // Calcular las deudas netas
+        // Calcular las deudas netas en una sola dirección
         players.forEach(debtor => {
             players.forEach(winner => {
                 if (debtor !== winner) {
@@ -128,6 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             summary[winner] = {};
                         }
                         summary[winner][debtor] = -netDebt;
+                    } else {
+                        if (summary[debtor]) {
+                            summary[debtor][winner] = 0;
+                        }
+                        if (summary[winner]) {
+                            summary[winner][debtor] = 0;
+                        }
                     }
                 }
             });
