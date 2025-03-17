@@ -6,8 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const startGameButton = document.getElementById('start-game');
     const registerPlayerButton = document.getElementById('register-player');
     const finishRegistrationButton = document.getElementById('finish-registration');
-    const showDebtFormButton = document.getElementById('show-debt-form');
-    const updateSummaryButton = document.getElementById('update-summary');
+    const startMatchButton = document.getElementById('start-match');
+    const endGameButton = document.getElementById('end-game');
     const addNewPlayerButton = document.getElementById('add-new-player');
     const debtForm = document.getElementById('debt-form');
     const registerDebtButton = document.getElementById('register-debt');
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Mostrar formulario para registrar deuda
-    showDebtFormButton.addEventListener('click', () => {
+    startMatchButton.addEventListener('click', () => {
         debtForm.style.display = 'block';
     });
 
@@ -64,15 +64,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (debtor && winner && amount > 0) {
             debts.push({ debtor, winner, amount });
+            calculateDebtSummary(); // Calcular deudas netas
+            updateDebtMatrix(); // Actualizar la matriz
             debtAmountInput.value = '';
             debtForm.style.display = 'none';
         }
     });
 
-    // Actualizar resumen de deudas
-    updateSummaryButton.addEventListener('click', () => {
-        calculateDebtSummary();
-        updateDebtMatrix();
+    // Finalizar juego
+    endGameButton.addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que deseas finalizar el juego?')) {
+            players = [];
+            debts = [];
+            summary = {};
+            welcomePage.style.display = 'block';
+            registerDebtsPage.style.display = 'none';
+        }
     });
 
     // Inicializar la matriz de deudas
