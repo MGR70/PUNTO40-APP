@@ -66,8 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             debts.push({ debtor, winner, amount });
             calculateDebtSummary(); // Calcular deudas netas
             updateDebtMatrix(); // Actualizar la matriz
-            debtAmountInput.value = '';
-            debtForm.style.display = 'none';
+            debtAmountInput.value = ''; // Limpiar el campo de monto
         }
     });
 
@@ -98,27 +97,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Calcular deudas netas
     function calculateDebtSummary() {
+        summary = {}; // Reiniciar el resumen
+
+        // Calcular las deudas brutas
         debts.forEach(debt => {
-            if (summary[debt.debtor] && summary[debt.debtor][debt.winner]) {
-                summary[debt.debtor][debt.winner] += debt.amount;
+            if (!summary[debt.debtor]) {
+                summary[debt.debtor] = {};
             }
+            if (!summary[debt.debtor][debt.winner]) {
+                summary[debt.debtor][debt.winner] = 0;
+            }
+            summary[debt.debtor][debt.winner] += debt.amount;
         });
 
+        // Calcular las deudas netas
         players.forEach(debtor => {
             players.forEach(winner => {
                 if (debtor !== winner) {
-                    const debtorToWinner = summary[debtor][winner] || 0;
-                    const winnerToDebtor = summary[winner][debtor] || 0;
+                    const debtorToWinner = summary[debtor] && summary[debtor][winner] ? summary[debtor][winner] : 0;
+                    const winnerToDebtor = summary[winner] && summary[winner][debtor] ? summary[winner][debtor] : 0;
+                    const netDebt = debtorToWinner - winnerToDebtor;
 
-                    if (debtorToWinner > winnerToDebtor) {
-                        summary[debtor][winner] = debtorToWinner - winnerToDebtor;
-                        summary[winner][debtor] = 0;
-                    } else if (winnerToDebtor > debtorToWinner) {
-                        summary[winner][debtor] = winnerToDebtor - debtorToWinner;
-                        summary[debtor][winner] = 0;
-                    } else {
-                        summary[debtor][winner] = 0;
-                        summary[winner][debtor] = 0;
+                    if (netDebt > 0) {
+                        if (!summary[debtor]) {
+                            summary[debtor] = {};
+                        }
+                        summary[debtor][winner] = netDebt;
+                    } else if (netDebt < 0) {
+                        if (!summary[winner]) {
+                            summary[winner] = {};
+                        }
+                        summary[winner][debtor] = -netDebt;
                     }
                 }
             });
