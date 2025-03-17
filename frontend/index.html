@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Página de Bienvenida -->
     <div id="welcome-page">
         <h1>BIENVENIDOS AL PUNTO CUARENTA</h1>
         <p>¡A JUGAR!</p>
@@ -14,30 +15,36 @@
         <button id="start-game">Iniciar juego</button>
     </div>
 
-    <div id="game-page" style="display: none;">
-        <h2>Registro de Jugadores y Deudas</h2>
-        
-        <div id="register-players">
-            <input type="text" id="player-name" placeholder="Nombre del jugador">
-            <button id="register-player">Registrar Jugador</button>
-            <h3>Jugadores Registrados</h3>
-            <ul id="player-list"></ul>
-        </div>
+    <!-- Página de Registro de Jugadores -->
+    <div id="register-players-page" style="display: none;">
+        <h2>Registro de Jugadores</h2>
+        <input type="text" id="player-name" placeholder="Nombre del jugador">
+        <button id="register-player">Registrar Jugador</button>
+        <h3>Jugadores Registrados</h3>
+        <ul id="player-list"></ul>
+        <button id="finish-registration">Finalizar Registro</button>
+    </div>
 
-        <div id="register-debts">
-            <h3>Registrar Deuda</h3>
+    <!-- Página de Registro de Deudas -->
+    <div id="register-debts-page" style="display: none;">
+        <h2>Registro de Deudas</h2>
+        
+        <!-- Botones para Registrar Deuda, Actualizar y Nuevo Jugador -->
+        <button id="show-debt-form">Registrar Deuda</button>
+        <button id="update-summary">Actualizar</button>
+        <button id="add-new-player">Nuevo Jugador</button>
+
+        <!-- Formulario para Registrar Deuda -->
+        <div id="debt-form" style="display: none;">
             <select id="debtor"></select>
             <select id="winner"></select>
             <input type="number" id="debt-amount" placeholder="Monto de deuda">
             <button id="register-debt">Registrar Deuda</button>
         </div>
 
-        <div id="debt-summary">
-            <h3>Resumen de Deudas</h3>
-            <table id="debt-matrix"></table>
-        </div>
-
-        <button id="end-game">Finalizar juego</button>
+        <!-- Matriz Resumen de Deudas -->
+        <h3>Resumen de Deudas</h3>
+        <table id="debt-matrix"></table>
     </div>
 
     <script src="script.js"></script>
