@@ -132,15 +132,15 @@ document.addEventListener('DOMContentLoaded', () => {
         players.forEach(debtor => {
             players.forEach(winner => {
                 if (debtor !== winner) {
-                    const debtorToWinner = summary[debtor][winner];
-                    const winnerToDebtor = summary[winner][debtor];
+                    const debtorToWinner = summary[debtor][winner] || 0;
+                    const winnerToDebtor = summary[winner][debtor] || 0;
 
                     if (debtorToWinner > winnerToDebtor) {
                         summary[debtor][winner] = debtorToWinner - winnerToDebtor;
-                        summary[winner][debtor] = 0;
+                        summary[winner][debtor] = 0; // Asegurarse de que no haya deuda en la dirección opuesta
                     } else if (winnerToDebtor > debtorToWinner) {
                         summary[winner][debtor] = winnerToDebtor - debtorToWinner;
-                        summary[debtor][winner] = 0;
+                        summary[debtor][winner] = 0; // Asegurarse de que no haya deuda en la dirección opuesta
                     } else {
                         summary[debtor][winner] = 0;
                         summary[winner][debtor] = 0;
@@ -148,6 +148,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
+
+        // Depuración: Mostrar el resumen en la consola
+        console.log('Resumen de deudas:', summary);
 
         return summary;
     }
