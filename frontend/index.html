@@ -1,94 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PUNTO40</title>
+    <title>Punto 40</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Pantalla de bienvenida -->
-    <div id="welcomeScreen">
-        <h1>Bienvenidos Punto Cuarenteros</h1>
-        <h2>¡A JUGAR!</h2>
-        <h2>No harán trampa</h2>
-        <button onclick="startGame()">Iniciar juego</button>
+    <div id="welcome-page">
+        <h1>BIENVENIDOS AL PUNTO CUARENTA</h1>
+        <p>¡A JUGAR!</p>
+        <p>No harán trampa</p>
+        <button id="start-game">Iniciar juego</button>
     </div>
 
-    <!-- Pantalla del juego -->
-    <div id="gameScreen" style="display: none;">
-        <!-- Registro de jugadores -->
-        <h2>Registro de jugadores</h2>
-        <div>
-            <label for="username">Jugador:</label>
-            <input type="text" id="username" placeholder="Nombre de jugador">
-            <button onclick="registerPlayer()">Registrar Jugador</button>
-        </div>
-        <div id="registeredPlayers">
-            <h3>Jugadores registrados:</h3>
-            <ul id="playersList"></ul>
-        </div>
-
-        <!-- Registro de deudas -->
-        <h2>Registro de cuentas por pagar</h2>
-        <div>
-            <label for="deudor">Deudor:</label>
-            <select id="deudor">
-                <option value="">Seleccionar jugador</option>
-            </select>
-            
-            <label for="ganador">Ganador:</label>
-            <select id="ganador">
-                <option value="">Seleccionar jugador</option>
-            </select>
-            
-            <label for="amount">Monto:</label>
-            <input type="number" id="amount" placeholder="Monto">
-            <button onclick="registerDebt()">Registrar Deuda</button>
-        </div>
-
-        <!-- Lista de deudas -->
-        <h2>Deudas entre jugadores</h2>
-        <ul id="debtList"></ul>
-
-        <!-- Botón para finalizar el juego -->
-        <button onclick="finalizarJuego()" style="margin-top: 20px;">Finalizar juego</button>
-
-        <!-- Política de privacidad -->
-        <h2 id="privacyPolicyTitle" style="display:none;">Política de Privacidad de "Punto 40"</h2>
-        <div id="privacyPolicy" style="display:none;">
-            <h2>Nuestra Política de Privacidad explica:</h2>
-            <ul>
-                <li>Qué información recopilamos y por qué la recopilamos.</li>
-                <li>Cómo utilizamos esa información.</li>
-                <li>Cómo nos conectamos a servicios de terceros.</li>
-            </ul>
-            <h2>Información que recopilamos</h2>
-            <p>Recopilamos información para brindar una mejor experiencia a todos nuestros usuarios. Recopilamos información de las siguientes maneras:</p>
-            <h3>Información que nos das:</h3>
-            <p>Cuando registre a un jugador en "Punto 40", le pediremos un nombre de usuario. Este nombre se almacena de forma segura en nuestros servidores y solo se utiliza para las funcionalidades de "Punto 40". No se comparte con ningún tercero. Se queda seguro con nosotros.</p>
-            <h3>Información que obtenemos de su uso de nuestros servicios:</h3>
-            <p>Recopilamos información de uso de "Punto 40", como los registros de puntajes y las deudas entre jugadores. La funcionalidad de informe de fallos es importante para que podamos solucionar rápidamente los problemas y fallos que ocurren en la aplicación.</p>
-            <h2>Seguridad de información</h2>
-            <p>Trabajamos arduamente para proteger "Punto 40" y a nuestros usuarios del acceso no autorizado o de la alteración, divulgación o destrucción no autorizada de la información que poseemos.</p>
-            <ul>
-                <li>Ciframos todas las transacciones con nuestros servidores utilizando SSL.</li>
-                <li>Restringimos el acceso a la información personal (es decir, el nombre de usuario utilizado para "Punto 40") a los empleados, contratistas o agentes de M.G. que necesiten conocer esa información para poder procesarla por nosotros. Esas personas están sujetas a estrictas obligaciones contractuales de confidencialidad y pueden ser sancionadas o despedidas si no cumplen con esas obligaciones.</li>
-            </ul>
-            <h2>Información que compartimos</h2>
-            <p>"No compartimos información de identificación personal públicamente y con nuestros socios, como inversores y socios comerciales. Es importante entender que esta información no es personal, es una agregación del comportamiento y uso de todos los usuarios."</p>
-            <h2>Cuándo se aplica esta Política de Privacidad</h2>
-            <p>Esta Política de Privacidad se aplica a los servicios ofrecidos por M.G.</p>
-            <h2>Cambios</h2>
-            <p>Nuestra Política de Privacidad puede cambiar de vez en cuando. No reduciremos sus derechos bajo esta Política de Privacidad sin su consentimiento explícito. También nos aseguraremos de mantener las versiones anteriores de esta Política de Privacidad en un archivo para su revisión.</p>
-        </div>
+    <div id="game-page" style="display: none;">
+        <h2>Registro de Jugadores y Deudas</h2>
         
-        <!-- Botones de política de privacidad -->
-        <button onclick="showPrivacyPolicy()">Política de Privacidad</button>
-        <button onclick="hidePrivacyPolicy()" id="backButton" style="display:none;">Regresar</button>
+        <div id="register-players">
+            <input type="text" id="player-name" placeholder="Nombre del jugador">
+            <button id="register-player">Registrar Jugador</button>
+            <h3>Jugadores Registrados</h3>
+            <ul id="player-list"></ul>
+        </div>
+
+        <div id="register-debts">
+            <h3>Registrar Deuda</h3>
+            <select id="debtor"></select>
+            <select id="winner"></select>
+            <input type="number" id="debt-amount" placeholder="Monto de deuda">
+            <button id="register-debt">Registrar Deuda</button>
+        </div>
+
+        <div id="debt-summary">
+            <h3>Resumen de Deudas</h3>
+            <table id="debt-matrix"></table>
+        </div>
+
+        <button id="end-game">Finalizar juego</button>
     </div>
 
-    <!-- Script JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
