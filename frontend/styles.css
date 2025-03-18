@@ -4,7 +4,7 @@ body {
     margin: 20px;
 }
 
-#welcome-page, #game-page {
+#welcome-page, #register-players-page, #register-debts-page {
     margin: 20px auto;
     padding: 20px;
     border: 1px solid #ccc;
