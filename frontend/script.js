@@ -123,11 +123,17 @@ document.addEventListener('DOMContentLoaded', () => {
                             summary[debtor] = {};
                         }
                         summary[debtor][winner] = netDebt; // Asignar a la celda correcta (deudor → ganador)
+                        if (summary[winner]) {
+                            summary[winner][debtor] = 0; // Limpiar la celda opuesta
+                        }
                     } else if (netDebt < 0) {
                         if (!summary[winner]) {
                             summary[winner] = {};
                         }
                         summary[winner][debtor] = -netDebt; // Asignar a la celda correcta (ganador → deudor)
+                        if (summary[debtor]) {
+                            summary[debtor][winner] = 0; // Limpiar la celda opuesta
+                        }
                     } else {
                         if (summary[debtor]) {
                             summary[debtor][winner] = 0;
