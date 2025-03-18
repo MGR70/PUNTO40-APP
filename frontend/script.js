@@ -23,90 +23,118 @@ document.addEventListener('DOMContentLoaded', () => {
   let debts = [];
 
   // Navegación entre páginas
-  startGameButton.addEventListener('click', () => {
-    console.log('Botón "Iniciar Juego" clickeado'); // Depuración
-    welcomePage.style.display = 'none';
-    registerPlayersPage.style.display = 'block';
-  });
+  if (startGameButton && welcomePage && registerPlayersPage) {
+    startGameButton.addEventListener('click', () => {
+      console.log('Botón "Iniciar Juego" clickeado'); // Depuración
+      welcomePage.style.display = 'none';
+      registerPlayersPage.style.display = 'block';
+    });
+  } else {
+    console.error('No se encontraron los elementos necesarios para la navegación');
+  }
 
-  finishRegistrationButton.addEventListener('click', () => {
-    registerPlayersPage.style.display = 'none';
-    registerDebtsPage.style.display = 'block';
-    updateSelectOptions();
-    fetchDebtSummary();
-  });
+  if (finishRegistrationButton && registerPlayersPage && registerDebtsPage) {
+    finishRegistrationButton.addEventListener('click', () => {
+      registerPlayersPage.style.display = 'none';
+      registerDebtsPage.style.display = 'block';
+      updateSelectOptions();
+      fetchDebtSummary();
+    });
+  } else {
+    console.error('No se encontraron los elementos necesarios para finalizar el registro');
+  }
 
-  addNewPlayerButton.addEventListener('click', () => {
-    registerDebtsPage.style.display = 'none';
-    registerPlayersPage.style.display = 'block';
-  });
+  if (addNewPlayerButton && registerDebtsPage && registerPlayersPage) {
+    addNewPlayerButton.addEventListener('click', () => {
+      registerDebtsPage.style.display = 'none';
+      registerPlayersPage.style.display = 'block';
+    });
+  } else {
+    console.error('No se encontraron los elementos necesarios para agregar un nuevo jugador');
+  }
 
   // Registrar jugador
-  registerPlayerButton.addEventListener('click', async () => {
-    const playerName = playerNameInput.value.trim();
-    if (playerName && !players.includes(playerName)) {
-      try {
-        const response = await fetch('/api/jugadores', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ nombre: playerName }),
-        });
-        const newPlayer = await response.json();
-        players.push(newPlayer.nombre);
-        updatePlayerList();
-        updateSelectOptions();
-        playerNameInput.value = '';
-      } catch (error) {
-        console.error('Error al registrar el jugador:', error);
+  if (registerPlayerButton && playerNameInput && playerList) {
+    registerPlayerButton.addEventListener('click', async () => {
+      const playerName = playerNameInput.value.trim();
+      if (playerName && !players.includes(playerName)) {
+        try {
+          const response = await fetch('/api/jugadores', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ nombre: playerName }),
+          });
+          const newPlayer = await response.json();
+          players.push(newPlayer.nombre);
+          updatePlayerList();
+          updateSelectOptions();
+          playerNameInput.value = '';
+        } catch (error) {
+          console.error('Error al registrar el jugador:', error);
+        }
       }
-    }
-  });
+    });
+  } else {
+    console.error('No se encontraron los elementos necesarios para registrar un jugador');
+  }
 
   // Mostrar formulario para registrar deuda
-  startMatchButton.addEventListener('click', () => {
-    debtForm.style.display = 'block';
-  });
+  if (startMatchButton && debtForm) {
+    startMatchButton.addEventListener('click', () => {
+      debtForm.style.display = 'block';
+    });
+  } else {
+    console.error('No se encontraron los elementos necesarios para mostrar el formulario de deudas');
+  }
 
   // Registrar deuda
-  registerDebtButton.addEventListener('click', async () => {
-    const debtor = debtorSelect.value;
-    const winner = winnerSelect.value;
-    const amount = parseFloat(debtAmountInput.value);
+  if (registerDebtButton && debtorSelect && winnerSelect && debtAmountInput) {
+    registerDebtButton.addEventListener('click', async () => {
+      const debtor = debtorSelect.value;
+      const winner = winnerSelect.value;
+      const amount = parseFloat(debtAmountInput.value);
 
-    if (debtor && winner && amount > 0) {
-      try {
-        const response = await fetch('/api/deudas', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            deudor_id: players.indexOf(debtor) + 1,
-            ganador_id: players.indexOf(winner) + 1,
-            monto: amount,
-          }),
-        });
-        const newDebt = await response.json();
-        debts.push(newDebt);
-        fetchDebtSummary();
-        debtAmountInput.value = '';
-      } catch (error) {
-        console.error('Error al registrar la deuda:', error);
+      if (debtor && winner && amount > 0) {
+        try {
+          const response = await fetch('/api/deudas', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              deudor_id: players.indexOf(debtor) + 1,
+              ganador_id: players.indexOf(winner) + 1,
+              monto: amount,
+            }),
+          });
+          const newDebt = await response.json();
+          debts.push(newDebt);
+          fetchDebtSummary();
+          debtAmountInput.value = '';
+        } catch (error) {
+          console.error('Error al registrar la deuda:', error);
+        }
       }
-    }
-  });
+    });
+  } else {
+    console.error('No se encontraron los elementos necesarios para registrar una deuda');
+  }
 
   // Finalizar juego
-  endGameButton.addEventListener('click', () => {
-    if (confirm('¿Estás seguro de que deseas finalizar el juego?')) {
-      players = [];
-      debts = [];
-      welcomePage.style.display = 'block';
-      registerDebtsPage.style.display = 'none';
-    }
-  });
+  if (endGameButton && welcomePage && registerDebtsPage) {
+    endGameButton.addEventListener('click', () => {
+      if (confirm('¿Estás seguro de que deseas finalizar el juego?')) {
+        players = [];
+        debts = [];
+        welcomePage.style.display = 'block';
+        registerDebtsPage.style.display = 'none';
+      }
+    });
+  } else {
+    console.error('No se encontraron los elementos necesarios para finalizar el juego');
+  }
 
   // Obtener y mostrar la matriz de deudas
   async function fetchDebtSummary() {
