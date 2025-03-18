@@ -123,10 +123,68 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const response = await fetch('/api/deudas');
       const debts = await response.json();
-      updateDebtMatrix(debts);
+      const summary = calculateDebtSummary(debts);
+      updateDebtMatrix(summary);
     } catch (error) {
       console.error('Error al obtener las deudas:', error);
     }
+  }
+
+  // Calcular el resumen de deudas
+  function calculateDebtSummary(debts) {
+    const summary = {};
+
+    // Calcular las deudas brutas en una sola dirección (deudor → ganador)
+    debts.forEach(debt => {
+      const debtor = players[debt.deudor_id - 1];
+      const winner = players[debt.ganador_id - 1];
+
+      if (!summary[debtor]) {
+        summary[debtor] = {};
+      }
+      if (!summary[debtor][winner]) {
+        summary[debtor][winner] = 0;
+      }
+      summary[debtor][winner] += debt.monto;
+    });
+
+    // Calcular las deudas netas en una sola dirección
+    players.forEach(debtor => {
+      players.forEach(winner => {
+        if (debtor !== winner) {
+          const debtorToWinner = summary[debtor] && summary[debtor][winner] ? summary[debtor][winner] : 0;
+          const winnerToDebtor = summary[winner] && summary[winner][debtor] ? summary[winner][debtor] : 0;
+          const netDebt = debtorToWinner - winnerToDebtor;
+
+          if (netDebt > 0) {
+            if (!summary[debtor]) {
+              summary[debtor] = {};
+            }
+            summary[debtor][winner] = netDebt; // Asignar a la celda correcta (deudor → ganador)
+            if (summary[winner]) {
+              summary[winner][debtor] = 0; // Limpiar la celda opuesta
+            }
+          } else if (netDebt < 0) {
+            if (!summary[winner]) {
+              summary[winner] = {};
+            }
+            summary[winner][debtor] = -netDebt; // Asignar a la celda correcta (ganador → deudor)
+            if (summary[debtor]) {
+              summary[debtor][winner] = 0; // Limpiar la celda opuesta
+            }
+          } else {
+            if (summary[debtor]) {
+              summary[debtor][winner] = 0;
+            }
+            if (summary[winner]) {
+              summary[winner][debtor] = 0;
+            }
+          }
+        }
+      });
+    });
+
+    return summary;
   }
 
   // Actualizar la lista de jugadores
@@ -153,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Actualizar la matriz de deudas en el DOM
-  function updateDebtMatrix(debts) {
+  function updateDebtMatrix(summary) {
     debtMatrix.innerHTML = '';
 
     const headerRow = document.createElement('tr');
@@ -176,10 +234,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (debtor === winner) {
           cell.textContent = '-';
         } else {
-          const debt = debts.find(
-            d => d.deudor_id === players.indexOf(debtor) + 1 && d.ganador_id === players.indexOf(winner) + 1
-          );
-          cell.textContent = debt ? debt.monto : '';
+          const netDebt = summary[debtor] && summary[debtor][winner] ? summary[debtor][winner] : 0;
+          cell.textContent = netDebt > 0 ? netDebt : '';
         }
         row.appendChild(cell);
       });
