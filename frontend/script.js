@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Navegación entre páginas
   startGameButton.addEventListener('click', () => {
+    console.log('Botón "Iniciar Juego" clickeado'); // Depuración
     welcomePage.style.display = 'none';
     registerPlayersPage.style.display = 'block';
   });
