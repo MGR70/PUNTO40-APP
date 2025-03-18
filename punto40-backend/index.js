@@ -4,20 +4,20 @@ const { Pool } = require('pg');
 
 // Configurar Express
 const app = express();
-const port = process.env.PORT || 3000; // Puerto en el que correrá el servidor
+const port = process.env.PORT || 3000;
 
 // Middleware para manejar JSON
 app.use(express.json());
 
 // Configurar la conexión a Neon (PostgreSQL)
 const pool = new Pool({
-  user: process.env.DB_USER, // Usuario de Neon
-  host: process.env.DB_HOST, // Host de Neon
-  database: process.env.DB_NAME, // Nombre de la base de datos
-  password: process.env.DB_PASSWORD, // Contraseña de Neon
-  port: 5432, // Puerto de PostgreSQL
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: 5432,
   ssl: {
-    rejectUnauthorized: false, // Necesario para conectarse a Neon
+    rejectUnauthorized: false,
   },
 });
 
@@ -70,6 +70,17 @@ app.get('/api/deudas', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al obtener las deudas');
+  }
+});
+
+// Ruta para borrar todas las deudas
+app.delete('/api/deudas', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM deudas');
+    res.status(200).send('Todas las deudas han sido borradas');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al borrar las deudas');
   }
 });
 
