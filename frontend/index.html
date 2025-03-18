@@ -29,15 +29,18 @@
     <div id="register-debts-page" style="display: none;">
         <h2>Registro de Deudas</h2>
         
-        <!-- Botones para Iniciar Partida, Finalizar Juego y Agregar Jugador -->
+        <!-- Botones para Iniciar Partida y Agregar Jugador -->
         <button id="start-match">Iniciar Partida</button>
-        <button id="end-game">Finalizar Juego</button>
         <button id="add-new-player">Agregar Jugador</button>
 
         <!-- Formulario para Registrar Deuda -->
         <div id="debt-form" style="display: none;">
+            <label for="debtor">Deudor:</label>
             <select id="debtor"></select>
+
+            <label for="winner">Ganador:</label>
             <select id="winner"></select>
+
             <input type="number" id="debt-amount" placeholder="Monto de deuda">
             <button id="register-debt">Registrar Deuda</button>
         </div>
@@ -45,6 +48,9 @@
         <!-- Matriz Resumen de Deudas -->
         <h3>Resumen de Deudas</h3>
         <table id="debt-matrix"></table>
+
+        <!-- Botón Finalizar Juego -->
+        <button id="end-game">Finalizar Juego</button>
     </div>
 
     <script src="script.js"></script>
