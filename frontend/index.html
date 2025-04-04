@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <!-- *** CLAVE PARA RESPONSIVE *** -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Punto 40 - Anotador</title>
+    <title>Punto 40 - Anotador (V21 Responsive)</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -21,11 +22,17 @@
         <div class="form-group">
             <label for="player-name">Nombre:</label>
             <input type="text" id="player-name" placeholder="Nombre del jugador">
-            <button id="register-player">Registrar Jugador</button>
+             <!-- Contenedor para botones de registro -->
+            <div class="button-group">
+                 <button id="register-player">Registrar Jugador</button>
+            </div>
         </div>
         <h3>Jugadores Registrados</h3>
         <ul id="player-list"></ul>
-        <button id="finish-registration">Ir al Registro de Deudas</button> <!-- Texto actualizado -->
+         <!-- Contenedor para botones de navegación -->
+        <div class="button-group">
+            <button id="finish-registration">Ir al Registro de Deudas</button>
+        </div>
     </div>
 
     <!-- Página de Registro de Deudas -->
@@ -45,19 +52,21 @@
             </div>
              <div class="form-group">
                 <label for="debt-amount">Monto:</label>
-                <input type="number" id="debt-amount" placeholder="Monto de deuda" min="1"> <!-- min="1" para evitar cero -->
+                <input type="number" id="debt-amount" placeholder="Monto" min="1">
              </div>
-            <button id="register-debt">Registrar Deuda</button>
+              <!-- Contenedor para botones de acción -->
+             <div class="button-group">
+                <button id="register-debt">Registrar Deuda</button>
+             </div>
         </div>
 
         <hr> <!-- Separador visual -->
 
         <!-- Matriz Resumen de Deudas -->
         <h3>Resumen de Deudas Netas</h3>
-        <p>(Las celdas muestran cuánto debe el jugador de la fila al jugador de la columna)</p>
+        <p class="table-instructions">(Desliza la tabla horizontalmente si es necesario)</p>
         <div class="table-container">
              <table id="debt-matrix">
-                 <!-- Contenido generado por JS -->
                  <thead></thead>
                  <tbody></tbody>
              </table>
@@ -67,12 +76,13 @@
         <hr> <!-- Separador visual -->
 
         <!-- Controles del Juego -->
-        <div class="game-controls">
-            <button id="add-new-player">Agregar Más Jugadores</button> <!-- Botón existente -->
-            <button id="end-game">Finalizar Juego y Borrar Datos</button>
+        <div class="game-controls button-group"> <!-- Añadido button-group -->
+            <button id="add-new-player">Agregar Más Jugadores</button>
+            <button id="end-game">Finalizar Juego</button>
         </div>
     </div>
 
+    <!-- El JS no cambia -->
     <script src="script.js"></script>
 </body>
 </html>
