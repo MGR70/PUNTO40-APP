@@ -1,25 +1,43 @@
+/* --- Estilos Base (Desktop y General) --- */
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
     margin: 0;
-    padding: 20px;
+    padding: 10px; /* Menos padding en body para pantallas pequeñas */
     background-color: #f4f4f4;
     color: #333;
+    font-size: 16px; /* Tamaño base */
 }
 
 .page {
     background-color: #fff;
-    margin: 20px auto;
-    padding: 20px;
+    margin: 15px auto;
+    padding: 15px;
     border: 1px solid #ccc;
-    border-radius: 10px;
+    border-radius: 8px;
     max-width: 800px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-h1, h2, h3 {
+h1 {
+    font-size: 1.8em; /* Usar em para escalar mejor */
     text-align: center;
     color: #333;
+    margin-bottom: 10px;
+}
+h2 {
+    font-size: 1.5em;
+    text-align: center;
+    color: #333;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+h3 {
+    font-size: 1.2em;
+    text-align: center;
+    color: #555;
+    margin-top: 20px;
+    margin-bottom: 10px;
 }
 
 p {
@@ -29,122 +47,140 @@ p {
 
 .form-group {
     margin-bottom: 15px;
-    text-align: center;
+    /* En móvil, los elementos se apilarán */
 }
 
 label {
-    display: inline-block;
-    margin-right: 5px;
+    display: block; /* Hace que la etiqueta ocupe su propia línea */
     margin-bottom: 5px;
     font-weight: bold;
-    min-width: 80px; /* Para alinear un poco */
-    text-align: right;
+    text-align: left; /* Alinea a la izquierda en móvil */
+    padding-left: 5px; /* Pequeña indentación */
 }
 
 input[type="text"],
 input[type="number"],
 select {
-    margin: 5px;
-    padding: 10px;
-    font-size: 16px;
+    width: calc(100% - 22px); /* Ocupa casi todo el ancho menos padding/border */
+    padding: 12px 10px; /* Padding generoso para tap */
+    font-size: 1em; /* Hereda tamaño o usa 16px */
     border: 1px solid #ccc;
     border-radius: 4px;
-    min-width: 150px; /* Ancho mínimo */
+    box-sizing: border-box; /* Incluye padding y border en el width */
+    margin-bottom: 10px; /* Espacio debajo */
+}
+
+/* Contenedor para centrar o agrupar botones */
+.button-group {
+    text-align: center;
+    margin-top: 15px;
+    margin-bottom: 10px;
 }
 
 button {
-    margin: 10px 5px;
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 12px 20px; /* Más padding vertical para tap */
+    font-size: 1em;
     cursor: pointer;
     background-color: #5cb85c;
     color: white;
     border: none;
     border-radius: 4px;
     transition: background-color 0.3s ease;
+    margin: 5px;
+    min-width: 150px; /* Ancho mínimo para que no sean muy pequeños */
+    display: inline-block; /* Por defecto */
 }
 
-button:hover {
+button:hover, button:focus { /* Estilos hover/focus para accesibilidad */
     background-color: #4cae4c;
+    outline: 2px solid #3a8f3a; /* Outline en foco */
 }
 
 #register-player {
     background-color: #337ab7;
 }
-#register-player:hover {
+#register-player:hover, #register-player:focus {
     background-color: #286090;
+    outline: 2px solid #1f4c73;
 }
-
 
 #end-game {
     background-color: #d9534f;
 }
-
-#end-game:hover {
+#end-game:hover, #end-game:focus {
     background-color: #c9302c;
+    outline: 2px solid #a52825;
 }
 
 #player-list {
-    list-style: decimal; /* Usar números para la lista */
-    padding-left: 40px; /* Añadir espacio para los números */
+    list-style: decimal inside; /* 'inside' para mejor manejo de espacio */
+    padding: 0 10px; /* Padding horizontal */
     margin: 15px auto;
-    max-width: 300px;
-    text-align: left; /* Alinear texto a la izquierda */
+    max-width: 95%; /* Usar % para adaptarse */
+    text-align: left;
 }
 
 #player-list li {
     background-color: #e9e9e9;
-    margin-bottom: 5px;
-    padding: 8px 12px;
+    margin-bottom: 6px;
+    padding: 10px 15px;
     border-radius: 4px;
 }
 
 hr {
-    margin: 30px 0;
+    margin: 25px 0;
     border: 0;
     border-top: 1px solid #eee;
 }
 
+.table-instructions {
+    font-size: 0.9em;
+    color: #777;
+    margin-bottom: 10px;
+}
+
+/* Contenedor de la Tabla para Scroll Horizontal */
 .table-container {
-    overflow-x: auto; /* Scroll horizontal si es necesario */
+    overflow-x: auto; /* *** CLAVE PARA RESPONSIVE TABLA *** */
     margin-bottom: 20px;
-    padding: 5px; /* Espacio para el borde del contenedor */
-    border: 1px solid #ddd; /* Borde suave alrededor */
+    border: 1px solid #ddd;
     border-radius: 5px;
+    -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
 }
 
 table {
-    margin: 0 auto; /* Centrar dentro del contenedor */
     border-collapse: collapse;
-    width: 100%;
-    min-width: 450px; /* Ancho mínimo antes de scroll */
+    width: 100%; /* La tabla intenta ocupar el 100% del CONTENEDOR */
+    min-width: 500px; /* Ancho mínimo antes de que el scroll sea necesario */
 }
 
 th, td {
     border: 1px solid #ccc;
-    padding: 10px 12px; /* Ajuste de padding */
+    padding: 8px 10px; /* Padding ligeramente reducido */
     text-align: center;
-    min-width: 90px;
-    height: 40px; /* Altura fija para alinear */
-    vertical-align: middle; /* Alinear verticalmente */
+    min-width: 80px; /* Ancho mínimo de celda */
+    height: 38px;
+    vertical-align: middle;
+    font-size: 0.9em; /* Fuente más pequeña en celdas */
+    white-space: nowrap; /* Evita que el texto largo rompa la celda */
 }
 
-thead th { /* Estilos específicos para cabecera */
+thead th {
     background-color: #f2f2f2;
     font-weight: bold;
-    position: sticky; /* Fijar cabecera horizontal */
-    top: 0; /* Necesario para sticky */
-    z-index: 1; /* Para que esté sobre el cuerpo al hacer scroll */
+    position: sticky;
+    top: 0;
+    z-index: 10; /* Asegura que esté por encima */
 }
 
-tbody th { /* Cabecera de fila (Deudores) */
-     background-color: #f8f8f8;
-     font-weight: bold;
-     text-align: right; /* Alinear nombres a la derecha */
-     padding-right: 15px;
-     position: sticky; /* Fijar cabecera vertical */
-     left: 0; /* Necesario para sticky */
-     z-index: 1;
+tbody th {
+    background-color: #f8f8f8;
+    font-weight: bold;
+    text-align: right;
+    padding-right: 12px;
+    position: sticky;
+    left: 0;
+    z-index: 5; /* Encima del body pero debajo de thead */
 }
 
 /* Esquina superior izquierda */
@@ -152,38 +188,96 @@ thead th:first-child {
     position: sticky;
     left: 0;
     top: 0;
-    z-index: 2; /* Por encima de ambas cabeceras sticky */
-    background-color: #e8e8e8; /* Color distintivo */
+    z-index: 15; /* Por encima de todo */
+    background-color: #e8e8e8;
 }
-
 
 td {
     background-color: #fff;
     font-weight: normal;
-    color: #333; /* Color por defecto del texto */
+    color: #333;
 }
 
-td.has-debt { /* Clase para celdas con deuda > 0 */
+td.has-debt {
     font-weight: bold;
-    color: #d9534f; /* Rojo para deudas */
+    color: #d9534f;
 }
 
-td.no-debt { /* Clase para celdas con deuda <= 0 */
-    color: #aaa; /* Gris claro para indicar cero o vacío */
+td.no-debt {
+    color: #aaa;
 }
 
-td.diagonal { /* Clase para la diagonal */
+td.diagonal {
     background-color: #eee;
     color: #888;
 }
 
+/* --- Media Queries para Móviles (ej. < 768px) --- */
+@media (max-width: 768px) {
+    body {
+        padding: 5px; /* Aún menos padding */
+        font-size: 15px; /* Ajustar tamaño base si es necesario */
+    }
 
-/* Ocultar páginas por defecto */
-.page:not(#welcome-page) {
-    display: none;
+    .page {
+        padding: 10px;
+        margin: 10px auto;
+    }
+
+    h1 { font-size: 1.6em; }
+    h2 { font-size: 1.3em; }
+    h3 { font-size: 1.1em; }
+
+    /* Hacer que los botones ocupen más ancho en móvil */
+    .button-group button {
+         /* display: block; /* Ocupa toda la línea */
+         /* width: 90%; /* Ancho casi completo */
+         /* margin: 8px auto; /* Centrado y espaciado */
+         /* Opcional: mantener inline-block pero asegurar suficiente espacio */
+         min-width: 120px; /* Ajustar ancho mínimo */
+         padding: 10px 15px; /* Ajustar padding */
+    }
+
+    /* Ajustes específicos de la tabla para pantallas muy pequeñas si es necesario */
+    th, td {
+        padding: 6px 8px; /* Menos padding */
+        min-width: 70px;  /* Celdas más estrechas */
+        font-size: 0.85em; /* Fuente aún más pequeña */
+    }
+     tbody th { /* Cabecera de fila */
+         padding-right: 8px;
+     }
 }
 
-.game-controls {
-    text-align: center;
-    margin-top: 20px;
+/* --- Media Queries para Móviles Muy Pequeños (ej. < 480px) --- */
+@media (max-width: 480px) {
+     h1 { font-size: 1.4em; }
+     h2 { font-size: 1.2em; }
+     h3 { font-size: 1.0em; }
+
+     /* Forzar botones a bloque para mejor tap */
+     .button-group button {
+         display: block;
+         width: 95%;
+         margin: 8px auto;
+         box-sizing: border-box;
+     }
+
+     #player-list {
+         padding: 0 5px; /* Menos padding en la lista */
+     }
+     #player-list li {
+         padding: 8px 10px;
+     }
+
+     th, td {
+        padding: 5px 6px;
+        min-width: 65px;
+        font-size: 0.8em;
+    }
+}
+
+/* Ocultar páginas por defecto (sin cambios) */
+.page:not(#welcome-page) {
+    display: none;
 }
