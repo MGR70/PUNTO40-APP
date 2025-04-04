@@ -3,56 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Punto 40</title>
-    <link rel="stylesheet" href="./styles.css">
+    <title>Punto 40 - Anotador</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Página de Bienvenida -->
-    <div id="welcome-page">
+    <div id="welcome-page" class="page">
         <h1>BIENVENIDOS AL PUNTO CUARENTA</h1>
         <p>¡A JUGAR!</p>
-        <p>No harán trampa</p>
-        <button id="start-game">Iniciar juego</button>
+        <p>No harán trampa 😉</p>
+        <button id="start-game">Iniciar Juego</button>
     </div>
 
     <!-- Página de Registro de Jugadores -->
-    <div id="register-players-page" style="display: none;">
+    <div id="register-players-page" class="page" style="display: none;">
         <h2>Registro de Jugadores</h2>
-        <input type="text" id="player-name" placeholder="Nombre del jugador">
-        <button id="register-player">Registrar Jugador</button>
+        <div class="form-group">
+            <label for="player-name">Nombre:</label>
+            <input type="text" id="player-name" placeholder="Nombre del jugador">
+            <button id="register-player">Registrar Jugador</button>
+        </div>
         <h3>Jugadores Registrados</h3>
         <ul id="player-list"></ul>
-        <button id="finish-registration">Finalizar Registro</button>
+        <button id="finish-registration">Ir al Registro de Deudas</button> <!-- Texto actualizado -->
     </div>
 
     <!-- Página de Registro de Deudas -->
-    <div id="register-debts-page" style="display: none;">
-        <h2>Registro de Deudas</h2>
-        
-        <!-- Botones para Iniciar Partida y Agregar Jugador -->
-        <button id="start-match">Iniciar Partida</button>
-        <button id="add-new-player">Agregar Jugador</button>
+    <div id="register-debts-page" class="page" style="display: none;">
+        <h2>Registro y Resumen de Deudas</h2>
 
         <!-- Formulario para Registrar Deuda -->
-        <div id="debt-form" style="display: none;">
-            <label for="debtor">Deudor:</label>
-            <select id="debtor"></select>
-
-            <label for="winner">Ganador:</label>
-            <select id="winner"></select>
-
-            <input type="number" id="debt-amount" placeholder="Monto de deuda">
+        <div id="debt-form">
+             <h3>Registrar Nueva Deuda</h3>
+            <div class="form-group">
+                <label for="debtor">Deudor:</label>
+                <select id="debtor"></select>
+            </div>
+             <div class="form-group">
+                <label for="winner">Acreedor (Ganador):</label>
+                <select id="winner"></select>
+            </div>
+             <div class="form-group">
+                <label for="debt-amount">Monto:</label>
+                <input type="number" id="debt-amount" placeholder="Monto de deuda" min="1"> <!-- min="1" para evitar cero -->
+             </div>
             <button id="register-debt">Registrar Deuda</button>
         </div>
 
-        <!-- Matriz Resumen de Deudas -->
-        <h3>Resumen de Deudas</h3>
-        <table id="debt-matrix"></table>
+        <hr> <!-- Separador visual -->
 
-        <!-- Botón Finalizar Juego -->
-        <button id="end-game">Finalizar Juego</button>
+        <!-- Matriz Resumen de Deudas -->
+        <h3>Resumen de Deudas Netas</h3>
+        <p>(Las celdas muestran cuánto debe el jugador de la fila al jugador de la columna)</p>
+        <div class="table-container">
+             <table id="debt-matrix">
+                 <!-- Contenido generado por JS -->
+                 <thead></thead>
+                 <tbody></tbody>
+             </table>
+        </div>
+
+
+        <hr> <!-- Separador visual -->
+
+        <!-- Controles del Juego -->
+        <div class="game-controls">
+            <button id="add-new-player">Agregar Más Jugadores</button> <!-- Botón existente -->
+            <button id="end-game">Finalizar Juego y Borrar Datos</button>
+        </div>
     </div>
 
-    <script src="./script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
