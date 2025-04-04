@@ -1,61 +1,189 @@
 body {
     font-family: Arial, sans-serif;
-    text-align: center;
+    line-height: 1.6;
     margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f0f0f0;
-}
-
-#welcome-page, #register-players-page, #register-debts-page {
-    background-color: white;
     padding: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.page {
+    background-color: #fff;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
-    width: 100%;
-    margin: 20px;
+    max-width: 800px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-button {
-    margin: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: white;
+h1, h2, h3 {
+    text-align: center;
+    color: #333;
 }
 
-button:hover {
-    background-color: #0056b3;
+p {
+    text-align: center;
+    margin-bottom: 15px;
 }
 
-input, select {
-    margin: 10px;
+.form-group {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+label {
+    display: inline-block;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    min-width: 80px; /* Para alinear un poco */
+    text-align: right;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    margin: 5px;
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
+    border-radius: 4px;
+    min-width: 150px; /* Ancho mínimo */
+}
+
+button {
+    margin: 10px 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #4cae4c;
+}
+
+#register-player {
+    background-color: #337ab7;
+}
+#register-player:hover {
+    background-color: #286090;
+}
+
+
+#end-game {
+    background-color: #d9534f;
+}
+
+#end-game:hover {
+    background-color: #c9302c;
+}
+
+#player-list {
+    list-style: decimal; /* Usar números para la lista */
+    padding-left: 40px; /* Añadir espacio para los números */
+    margin: 15px auto;
+    max-width: 300px;
+    text-align: left; /* Alinear texto a la izquierda */
+}
+
+#player-list li {
+    background-color: #e9e9e9;
+    margin-bottom: 5px;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+hr {
+    margin: 30px 0;
+    border: 0;
+    border-top: 1px solid #eee;
+}
+
+.table-container {
+    overflow-x: auto; /* Scroll horizontal si es necesario */
+    margin-bottom: 20px;
+    padding: 5px; /* Espacio para el borde del contenedor */
+    border: 1px solid #ddd; /* Borde suave alrededor */
     border-radius: 5px;
-    width: calc(100% - 22px); /* Ajustar el ancho */
 }
 
 table {
-    margin: 20px auto;
+    margin: 0 auto; /* Centrar dentro del contenedor */
     border-collapse: collapse;
     width: 100%;
+    min-width: 450px; /* Ancho mínimo antes de scroll */
 }
 
 th, td {
     border: 1px solid #ccc;
-    padding: 10px;
+    padding: 10px 12px; /* Ajuste de padding */
     text-align: center;
+    min-width: 90px;
+    height: 40px; /* Altura fija para alinear */
+    vertical-align: middle; /* Alinear verticalmente */
 }
 
-th {
-    background-color: #f8f9fa;
+thead th { /* Estilos específicos para cabecera */
+    background-color: #f2f2f2;
+    font-weight: bold;
+    position: sticky; /* Fijar cabecera horizontal */
+    top: 0; /* Necesario para sticky */
+    z-index: 1; /* Para que esté sobre el cuerpo al hacer scroll */
+}
+
+tbody th { /* Cabecera de fila (Deudores) */
+     background-color: #f8f8f8;
+     font-weight: bold;
+     text-align: right; /* Alinear nombres a la derecha */
+     padding-right: 15px;
+     position: sticky; /* Fijar cabecera vertical */
+     left: 0; /* Necesario para sticky */
+     z-index: 1;
+}
+
+/* Esquina superior izquierda */
+thead th:first-child {
+    position: sticky;
+    left: 0;
+    top: 0;
+    z-index: 2; /* Por encima de ambas cabeceras sticky */
+    background-color: #e8e8e8; /* Color distintivo */
+}
+
+
+td {
+    background-color: #fff;
+    font-weight: normal;
+    color: #333; /* Color por defecto del texto */
+}
+
+td.has-debt { /* Clase para celdas con deuda > 0 */
+    font-weight: bold;
+    color: #d9534f; /* Rojo para deudas */
+}
+
+td.no-debt { /* Clase para celdas con deuda <= 0 */
+    color: #aaa; /* Gris claro para indicar cero o vacío */
+}
+
+td.diagonal { /* Clase para la diagonal */
+    background-color: #eee;
+    color: #888;
+}
+
+
+/* Ocultar páginas por defecto */
+.page:not(#welcome-page) {
+    display: none;
+}
+
+.game-controls {
+    text-align: center;
+    margin-top: 20px;
 }
