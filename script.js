@@ -111,14 +111,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Funciones Auxiliares ---
-    /** Muestra la página con el ID dado y oculta las demás */
-    function showPage(pageId) {
-        // *** AÑADIDO LOG PARA VERIFICAR ***
-        console.log(`Función showPage llamada para mostrar: ${pageId}`);
-        document.querySelectorAll('.page').forEach(page => {
-            page.style.display = page.id === pageId ? 'block' : 'none';
-        });
+   /** Muestra la página con el ID dado y oculta las demás */
+function showPage(pageId) {
+    // *** LOGS DE DEPURACIÓN DETALLADOS ***
+    console.log(`--- Intentando mostrar página: ${pageId} ---`);
+    const pages = document.querySelectorAll('.page');
+    console.log(`Encontrados ${pages.length} elementos con la clase 'page'.`);
+
+    if (pages.length === 0) {
+        console.error("¡ERROR GRAVE! No se encontraron elementos con la clase 'page'. Verifica tu HTML.");
+        return;
     }
+
+    let foundTargetPage = false;
+    pages.forEach(page => {
+        if (!page.id) {
+            console.warn("ADVERTENCIA: Elemento con clase 'page' no tiene ID:", page);
+            // Decide si quieres ocultarlo por defecto o ignorarlo
+             page.style.display = 'none'; // Ocultar elementos 'page' sin ID
+            return; // Saltar al siguiente
+        }
+
+        const shouldDisplay = page.id === pageId;
+        console.log(`Procesando: ID="${page.id}". ¿Coincide con "${pageId}"? ${shouldDisplay}`);
+
+        if (shouldDisplay) {
+            console.log(`   -> Estableciendo display = 'block' para ID="${page.id}"`);
+            page.style.display = 'block';
+            foundTargetPage = true;
+        } else {
+            console.log(`   -> Estableciendo display = 'none' para ID="${page.id}"`);
+            page.style.display = 'none';
+        }
+        // Verificación opcional del estilo aplicado
+        // console.log(`   Estilo 'display' actual para ID="${page.id}" es: ${window.getComputedStyle(page).display}`);
+    });
+
+    if (!foundTargetPage) {
+         console.error(`¡ERROR! No se encontró ningún div con ID="${pageId}" entre los elementos .page.`);
+    }
+     console.log(`--- Fin de showPage para: ${pageId} ---`);
+}
 
     function updatePlayerList() { /* ... código igual ... */ }
     function updateSelectOptions() { /* ... código igual ... */ }
