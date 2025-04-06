@@ -1,9 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Selección de Elementos del DOM (sin cambios) ---
+    // --- Selección de Elementos del DOM ---
     const welcomePage = document.getElementById('welcome-page');
     const registerPlayersPage = document.getElementById('register-players-page');
     const registerDebtsPage = document.getElementById('register-debts-page');
     const startGameButton = document.getElementById('start-game');
+    // --- NUEVO ELEMENTO ---
+    const continueGameButton = document.getElementById('continue-game'); // Seleccionar el nuevo botón
+    // --- FIN NUEVO ELEMENTO ---
     const registerPlayerButton = document.getElementById('register-player');
     const finishRegistrationButton = document.getElementById('finish-registration');
     const addNewPlayerButton = document.getElementById('add-new-player');
@@ -19,14 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const debtMatrixThead = debtMatrixTable.querySelector('thead');
     const debtMatrixTbody = debtMatrixTable.querySelector('tbody');
 
-    // --- Estado de la Aplicación (MODIFICADO) ---
-    let currentGameId = null; // Guarda el ID del juego activo
-    let currentPlayers = []; // Caché local de jugadores del juego actual
-    let currentDebts = [];   // Caché local de deudas del juego actual
-    let summary = {}; // Resumen de deudas (calculado localmente como antes)
+    // --- Estado de la Aplicación ---
+    let currentGameId = null;
+    let currentPlayers = [];
+    let currentDebts = [];
+    let summary = {};
 
     // --- Helper para llamadas a la API ---
-    // Función genérica para hacer peticiones a nuestra API backend
     async function apiRequest(endpoint, method = 'GET', body = null) {
         const options = {
             method,
@@ -38,15 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // La URL de la API será relativa (ej: '/api/start-game')
-            // Vercel sabrá cómo dirigirla a la función correcta.
             const response = await fetch(`/api/${endpoint}`, options);
 
-            // Si la respuesta no es OK (ej: 404, 500), lanzar un error
             if (!response.ok) {
                 let errorData;
                 try {
-                    errorData = await response.json(); // Intenta obtener mensaje de error del backend
+                    errorData = await response.json();
                 } catch (e) {
                     errorData = { message: `HTTP error! status: ${response.status}` };
                 }
@@ -54,126 +53,161 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorData.message || `Request failed with status ${response.status}`);
             }
 
-            // Si la respuesta es 204 No Content (ej: a veces en DELETE), no hay cuerpo JSON
-             if (response.status === 204) {
-                 return null;
-             }
-
-            // Si todo OK, devolver los datos JSON
+            if (response.status === 204) {
+                return null;
+            }
             return await response.json();
 
         } catch (error) {
             console.error(`Network or fetch error for endpoint ${endpoint}:`, error);
-            // Mostrar error al usuario de forma más amigable
             alert(`Error de red o del servidor: ${error.message}. Intenta de nuevo.`);
-            throw error; // Relanzar para que el código que llamó sepa que falló
+            throw error;
         }
     }
-
 
     // --- Lógica de Inicio y Carga del Juego ---
 
-    // Intenta cargar un juego existente al iniciar la app
+    // --- MODIFICADO: loadExistingGame ---
+    // Solo verifica si hay un juego guardado para mostrar/ocultar el botón "Continuar"
     function loadExistingGame() {
         const savedGameId = localStorage.getItem('currentGameId');
         if (savedGameId) {
-            if (confirm('¿Deseas continuar con el último juego guardado?')) {
-                currentGameId = savedGameId;
-                fetchAndDisplayGameState(); // Carga datos y muestra página de deudas
-            } else {
-                // El usuario no quiere continuar, limpiar el ID guardado
-                localStorage.removeItem('currentGameId');
-                currentGameId = null;
-                showPage('welcome-page'); // Volver a bienvenida
-            }
+            // Si hay un ID guardado, simplemente muestra el botón "Continuar"
+            console.log("Juego guardado encontrado:", savedGameId); // Ayuda a depurar
+            continueGameButton.style.display = 'inline-block'; // O 'block' según tu CSS
         } else {
-            showPage('welcome-page'); // No hay juego guardado, mostrar bienvenida
+            // Si no hay ID, oculta el botón
+            console.log("No se encontró juego guardado."); // Ayuda a depurar
+            continueGameButton.style.display = 'none';
         }
+        // Siempre muestra la página de bienvenida al inicio ahora
+        showPage('welcome-page');
     }
+    // --- FIN MODIFICADO: loadExistingGame ---
+
+    // --- NUEVO: Event Listener para el botón "Continuar Último Juego" ---
+    continueGameButton.addEventListener('click', () => {
+        const savedGameId = localStorage.getItem('currentGameId');
+        if (savedGameId) {
+            console.log("Botón 'Continuar' presionado. Cargando juego ID:", savedGameId); // Ayuda a depurar
+            currentGameId = savedGameId;
+            // Llamamos a la función que realmente carga los datos y muestra la página
+            fetchAndDisplayGameState();
+        } else {
+            // Esto no debería pasar si el botón está visible, pero por seguridad:
+            alert("No se encontró ningún juego guardado para continuar.");
+            continueGameButton.style.display = 'none'; // Ocultar si el ID desapareció
+        }
+    });
+    // --- FIN NUEVO: Event Listener ---
+
 
     // Obtiene jugadores y deudas del backend y actualiza la UI
     async function fetchAndDisplayGameState() {
-        if (!currentGameId) return;
+        if (!currentGameId) {
+            console.log("fetchAndDisplayGameState llamado sin currentGameId"); // Ayuda a depurar
+            return;
+        }
+        console.log("fetchAndDisplayGameState: Intentando cargar estado para ID:", currentGameId); // Ayuda a depurar
 
         try {
-            // Llama a la API para obtener el estado del juego
             const gameState = await apiRequest(`get-game-state?gameId=${currentGameId}`, 'GET');
+            console.log("Estado del juego recibido:", gameState); // Ayuda a depurar
 
-            // Actualiza las variables locales (caché)
             currentPlayers = gameState.players || [];
             currentDebts = gameState.debts || [];
 
-            // Actualiza la UI
-            updatePlayerList(); // Actualiza lista en ambas páginas si es necesario
-            updateSelectOptions(); // Actualiza los <select> en la pág de deudas
-            calculateDebtSummary(); // Recalcula el resumen con los datos frescos
-            updateDebtMatrix(); // Redibuja la tabla de deudas
+            updatePlayerList();
+            updateSelectOptions();
+            calculateDebtSummary();
+            updateDebtMatrix();
 
-            // Decide qué página mostrar
-            if (currentPlayers.length < 2) {
-                // Si por alguna razón el juego cargado tiene menos de 2 jugadores, ir a registro
+            if (currentPlayers.length === 0) { // Si por alguna razón no hay jugadores
+                console.log("Juego cargado sin jugadores, yendo a registro."); // Ayuda a depurar
                  showPage('register-players-page');
                  playerNameInput.focus();
             } else {
-                 // Si hay suficientes jugadores, ir directo a la página de deudas
+                 console.log("Juego cargado, yendo a registro de deudas."); // Ayuda a depurar
                  showPage('register-debts-page');
             }
 
         } catch (error) {
-            // Si falla la carga, informar al usuario y limpiar el estado
-            alert(`No se pudo cargar el estado del juego (ID: ${currentGameId}). Iniciando uno nuevo.`);
+            alert(`No se pudo cargar el estado del juego (ID: ${currentGameId}).`); // Quitado "Iniciando uno nuevo."
             console.error("Error fetching game state:", error);
-            localStorage.removeItem('currentGameId');
+            localStorage.removeItem('currentGameId'); // Limpia el ID inválido
             currentGameId = null;
-            resetLocalState(); // Limpia variables locales
-            showPage('welcome-page');
+            resetLocalState();
+            continueGameButton.style.display = 'none'; // Ocultar botón continuar
+            showPage('welcome-page'); // Volver a bienvenida
         }
     }
 
 
-    // --- Navegación entre Páginas (MODIFICADO) ---
+    // --- Navegación entre Páginas ---
 
+    // --- MODIFICADO: startGameButton Listener ---
     startGameButton.addEventListener('click', async () => {
-        if (currentGameId && !confirm('Ya hay un juego activo. ¿Deseas finalizarlo y empezar uno nuevo?')) {
-             return; // No hacer nada si el usuario cancela
-        }
-
+        // Preguntar si se quiere finalizar el juego activo (si existe)
         if (currentGameId) {
-             await handleEndGame(false); // Finaliza el juego anterior sin preguntar de nuevo
+             console.log("Juego activo detectado (ID:", currentGameId, "). Preguntando para finalizar."); // Ayuda a depurar
+            if (!confirm('Ya hay un juego activo. ¿Deseas finalizarlo y empezar uno nuevo? (Los datos guardados se borrarán)')) {
+                console.log("Usuario canceló iniciar nuevo juego."); // Ayuda a depurar
+                 return; // No hacer nada si el usuario cancela
+            }
+            // Si confirma, finalizar el juego anterior SIN volver a preguntar
+             console.log("Usuario confirmó finalizar juego anterior."); // Ayuda a depurar
+            await handleEndGame(false);
+            // handleEndGame ya limpia localStorage, currentGameId, estado local y oculta el botón continuar
+        } else {
+            // Si no había juego activo, igual limpiamos por si acaso
+             console.log("No había juego activo. Limpiando estado antes de iniciar nuevo juego."); // Ayuda a depurar
+            localStorage.removeItem('currentGameId');
+            currentGameId = null;
+            continueGameButton.style.display = 'none';
+            resetLocalState();
         }
 
+
+        // Ahora que estamos seguros que no hay juego activo (o se finalizó)
+        console.log("Intentando iniciar nuevo juego vía API..."); // Ayuda a depurar
         try {
             // Llama a la API para crear un nuevo juego
             const data = await apiRequest('start-game', 'POST');
-            currentGameId = data.gameId; // Guarda el ID del nuevo juego
-            localStorage.setItem('currentGameId', currentGameId); // Guarda en localStorage para persistencia
+            currentGameId = data.gameId;
+            localStorage.setItem('currentGameId', currentGameId);
             console.log("Nuevo juego iniciado con ID:", currentGameId);
 
-            resetLocalState(); // Limpia jugadores y deudas locales
-            updatePlayerList(); // Lista visual vacía
-            updateSelectOptions(); // Selects vacíos (con placeholder)
-            updateDebtMatrix(); // Matriz vacía
+            // Actualizar UI para el nuevo juego vacío
+            updatePlayerList();
+            updateSelectOptions();
+            updateDebtMatrix();
 
             showPage('register-players-page');
             playerNameInput.focus();
         } catch (error) {
-            // Error al contactar la API para iniciar juego
             // La función apiRequest ya muestra un alert()
-            console.error("Failed to start new game:", error);
+            console.error("Falló la creación de un nuevo juego vía API:", error);
+            // Asegurarnos de limpiar por si algo quedó a medias
+             localStorage.removeItem('currentGameId');
+             currentGameId = null;
+             continueGameButton.style.display = 'none';
+             resetLocalState();
+             showPage('welcome-page'); // Volver a bienvenida si falla
         }
     });
+    // --- FIN MODIFICADO: startGameButton Listener ---
+
 
     finishRegistrationButton.addEventListener('click', () => {
         if (currentPlayers.length < 2) {
             alert('Debes registrar al menos dos jugadores.');
             return;
         }
-        // Ya no necesitamos cargar datos aquí porque se cargan/actualizan
-        // después de cada acción (añadir jugador/deuda)
         showPage('register-debts-page');
-        // Asegurarse que los selects y la matriz estén actualizados es bueno
+        // Es buena idea refrescar por si acaso, aunque no debería ser necesario
+        // si la UI se actualiza correctamente al añadir jugadores.
         updateSelectOptions();
-        calculateDebtSummary(); // Calcular con datos actuales
+        calculateDebtSummary();
         updateDebtMatrix();
     });
 
@@ -182,46 +216,45 @@ document.addEventListener('DOMContentLoaded', () => {
         playerNameInput.focus();
     });
 
-    // --- Lógica de Jugadores (MODIFICADO) ---
+    // --- Lógica de Jugadores ---
     registerPlayerButton.addEventListener('click', async () => {
         const playerName = playerNameInput.value.trim();
         if (!playerName) {
             alert('Por favor, introduce un nombre de jugador.');
             return;
         }
-        // Validación local rápida (aunque el backend también valida)
         if (currentPlayers.includes(playerName)) {
-             alert(`El jugador "${playerName}" ya ha sido registrado en este juego.`);
-             playerNameInput.select();
-             return;
+            alert(`El jugador "${playerName}" ya ha sido registrado en este juego.`);
+            playerNameInput.select();
+            return;
         }
-
         if (!currentGameId) {
-             alert("Error: No hay un juego activo para añadir jugadores.");
-             return;
+            alert("Error: No hay un juego activo para añadir jugadores.");
+             console.error("Intento de añadir jugador sin currentGameId"); // Ayuda a depurar
+            return;
         }
 
+        console.log("Intentando añadir jugador:", playerName, "al juego ID:", currentGameId); // Ayuda a depurar
         try {
-            // Llama a la API para añadir el jugador
             await apiRequest('add-player', 'POST', { gameId: currentGameId, playerName });
+            console.log("Jugador añadido con éxito vía API."); // Ayuda a depurar
 
-            // Si tuvo éxito, actualiza la lista de jugadores localmente y la UI
-            // Es MÁS EFICIENTE simplemente añadirlo localmente si la API tuvo éxito,
-            // que volver a pedir toda la lista al servidor.
-            currentPlayers.push(playerName); // Añadir al caché local
-            updatePlayerList(); // Actualizar la lista visual
-            updateSelectOptions(); // Actualizar selects por si acaso
+            // Actualización local optimista
+            currentPlayers.push(playerName);
+            updatePlayerList();
+            updateSelectOptions();
+            // Recalcular matriz (aunque no habrá deudas nuevas aún)
+             calculateDebtSummary();
+             updateDebtMatrix();
+
 
             playerNameInput.value = '';
             playerNameInput.focus();
 
         } catch (error) {
-            // Si la API devuelve un error (ej: 409 Conflict - jugador ya existe),
-            // apiRequest ya debería haber mostrado un alert.
-             console.error("Failed to add player:", error);
-             // Podríamos querer refrescar el estado por si acaso
-             // fetchAndDisplayGameState();
-             playerNameInput.select(); // Seleccionar para corregir
+             console.error("Falló añadir jugador:", error);
+             // apiRequest ya mostró alert. No es necesario refrescar todo el estado necesariamente.
+             playerNameInput.select();
         }
     });
 
@@ -232,13 +265,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Lógica de Deudas (MODIFICADO) ---
+    // --- Lógica de Deudas ---
     registerDebtButton.addEventListener('click', async () => {
         const debtor = debtorSelect.value;
         const winner = winnerSelect.value;
         const amount = parseFloat(debtAmountInput.value);
 
-        // Validaciones (iguales que antes)
         if (!debtor || !winner) {
             alert('Debes seleccionar un deudor y un acreedor.');
             return;
@@ -252,83 +284,93 @@ document.addEventListener('DOMContentLoaded', () => {
             debtAmountInput.focus();
             return;
         }
-
         if (!currentGameId) {
-             alert("Error: No hay un juego activo para registrar deudas.");
-             return;
+            alert("Error: No hay un juego activo para registrar deudas.");
+             console.error("Intento de añadir deuda sin currentGameId"); // Ayuda a depurar
+            return;
         }
 
+         console.log(`Intentando añadir deuda: ${debtor} -> ${winner} (${amount}) en juego ID: ${currentGameId}`); // Ayuda a depurar
         try {
-            // Llama a la API para añadir la deuda
             await apiRequest('add-debt', 'POST', { gameId: currentGameId, debtor, winner, amount });
+             console.log("Deuda añadida con éxito vía API."); // Ayuda a depurar
 
-            // Si tuvo éxito, añadir la deuda localmente y actualizar UI
-            // De nuevo, más eficiente que pedir todas las deudas de nuevo.
-            currentDebts.push({ debtor, winner, amount }); // Añadir al caché local
-            calculateDebtSummary(); // Recalcular resumen con la nueva deuda
-            updateDebtMatrix(); // Actualizar la tabla
+            // Actualización local optimista
+            currentDebts.push({ debtor, winner, amount });
+            calculateDebtSummary();
+            updateDebtMatrix();
 
             debtAmountInput.value = '';
             debtAmountInput.focus();
 
         } catch (error) {
-            console.error("Failed to add debt:", error);
-            // El error ya se mostró en alert() por apiRequest
+            console.error("Falló añadir deuda:", error);
+            // apiRequest ya mostró alert.
         }
     });
 
-    // --- Lógica de Finalización (MODIFICADO) ---
+    // --- Lógica de Finalización ---
     endGameButton.addEventListener('click', () => {
-        handleEndGame(true); // Llama a la función que maneja la finalización, preguntando primero
+         console.log("Botón Finalizar Juego presionado."); // Ayuda a depurar
+        // Llama a la función que maneja la finalización, preguntando primero
+        handleEndGame(true);
     });
 
+    // --- MODIFICADO: handleEndGame ---
     // Nueva función para manejar la finalización del juego
     async function handleEndGame(askConfirmation = true) {
-         if (!currentGameId) {
+        if (!currentGameId) {
             alert("No hay ningún juego activo para finalizar.");
-            resetLocalState();
+            // Limpiar por si acaso algo quedó inconsistente
+             resetLocalState();
+             continueGameButton.style.display = 'none';
             showPage('welcome-page');
             return;
         }
 
-        if (askConfirmation && !confirm('¿Estás seguro de que deseas finalizar el juego? Se borrarán todos los datos de este juego de la base de datos.')) {
+         console.log("handleEndGame llamado para ID:", currentGameId, "Confirmar:", askConfirmation); // Ayuda a depurar
+        if (askConfirmation && !confirm('¿Estás seguro de que deseas finalizar el juego? Se borrarán todos los datos guardados de este juego.')) {
+             console.log("Usuario canceló finalizar juego."); // Ayuda a depurar
             return; // El usuario canceló
         }
 
+        console.log("Intentando finalizar juego vía API..."); // Ayuda a depurar
         try {
-             // Llama a la API para borrar el juego en el backend
+            // Llama a la API para borrar el juego en el backend
             await apiRequest('end-game', 'POST', { gameId: currentGameId });
+             console.log("Juego finalizado con éxito vía API."); // Ayuda a depurar
 
             // Si tiene éxito, limpia todo localmente
-            console.log("Juego finalizado y borrado:", currentGameId);
-            localStorage.removeItem('currentGameId'); // Limpia el ID guardado
+            localStorage.removeItem('currentGameId');
             currentGameId = null;
-            resetLocalState(); // Limpia variables locales
+            resetLocalState();
             updatePlayerList(); // Limpia UI
             updateSelectOptions();
             updateDebtMatrix();
-
+            continueGameButton.style.display = 'none'; // Ocultar botón al finalizar
             showPage('welcome-page'); // Vuelve a la bienvenida
 
         } catch (error) {
-             console.error("Failed to end game:", error);
-             // El error ya se mostró en alert()
-             // Quizás el juego ya no existía en el backend, pero igual limpiamos localmente
-             localStorage.removeItem('currentGameId');
-             currentGameId = null;
-             resetLocalState();
-             updatePlayerList();
-             updateSelectOptions();
-             updateDebtMatrix();
-             showPage('welcome-page');
+            console.error("Falló finalizar juego vía API:", error);
+            // apiRequest ya mostró alert.
+            // Aunque falle la API (ej: juego ya borrado), igual limpiamos localmente
+            localStorage.removeItem('currentGameId');
+            currentGameId = null;
+            resetLocalState();
+            updatePlayerList();
+            updateSelectOptions();
+            updateDebtMatrix();
+            continueGameButton.style.display = 'none'; // Ocultar botón también si hay error
+            showPage('welcome-page');
         }
     }
+    // --- FIN MODIFICADO: handleEndGame ---
 
 
-    // --- Funciones Auxiliares (MODIFICADAS donde sea necesario) ---
-
+    // --- Funciones Auxiliares ---
     /** Muestra la página con el ID dado y oculta las demás */
     function showPage(pageId) {
+         console.log("Mostrando página:", pageId); // Ayuda a depurar
         document.querySelectorAll('.page').forEach(page => {
             page.style.display = page.id === pageId ? 'block' : 'none';
         });
@@ -348,20 +390,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateSelectOptions() {
         const currentDebtor = debtorSelect.value;
         const currentWinner = winnerSelect.value;
-
         debtorSelect.innerHTML = '';
         winnerSelect.innerHTML = '';
-
         const defaultOption = document.createElement('option');
         defaultOption.value = "";
         defaultOption.textContent = "-- Selecciona Jugador --";
-        defaultOption.disabled = true; // Hacerla no seleccionable
-        // No la seleccionamos por defecto si hay jugadores, para forzar selección
-        // defaultOption.selected = true;
-
+        defaultOption.disabled = true;
         debtorSelect.appendChild(defaultOption.cloneNode(true));
         winnerSelect.appendChild(defaultOption.cloneNode(true));
-
         currentPlayers.forEach(player => {
             const option = document.createElement('option');
             option.value = player;
@@ -369,34 +405,20 @@ document.addEventListener('DOMContentLoaded', () => {
             debtorSelect.appendChild(option.cloneNode(true));
             winnerSelect.appendChild(option.cloneNode(true));
         });
-
-        // Restaurar selección si es posible y hay jugadores
         if (currentPlayers.length > 0) {
-            if (currentPlayers.includes(currentDebtor)) {
-                debtorSelect.value = currentDebtor;
-            } else {
-                 debtorSelect.value = ""; // Si el jugador ya no está, deseleccionar
-            }
-            if (currentPlayers.includes(currentWinner)) {
-                winnerSelect.value = currentWinner;
-            } else {
-                 winnerSelect.value = "";
-            }
-            // Si no había nada seleccionado antes, seleccionar el placeholder
-            if (!debtorSelect.value) debtorSelect.value = "";
-            if (!winnerSelect.value) winnerSelect.value = "";
-
+            debtorSelect.value = currentPlayers.includes(currentDebtor) ? currentDebtor : "";
+            winnerSelect.value = currentPlayers.includes(currentWinner) ? currentWinner : "";
         } else {
-            // Si no hay jugadores, asegurar que el placeholder esté seleccionado
-             debtorSelect.value = "";
-             winnerSelect.value = "";
+            debtorSelect.value = "";
+            winnerSelect.value = "";
         }
-
-
+        // Asegurar que el placeholder esté seleccionado si no hay valor válido
+        if (!debtorSelect.value) debtorSelect.value = "";
+        if (!winnerSelect.value) winnerSelect.value = "";
     }
 
-     /** Inicializa/Resetea la estructura del objeto `summary` con ceros para `currentPlayers` */
-     function initializeDebtSummary() {
+    /** Inicializa/Resetea la estructura del objeto `summary` con ceros para `currentPlayers` */
+    function initializeDebtSummary() {
         summary = {};
         currentPlayers.forEach(p1 => {
             summary[p1] = {};
@@ -410,97 +432,84 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /** Calcula el resumen (`summary`) basado en `currentPlayers` y `currentDebts` */
     function calculateDebtSummary() {
-        initializeDebtSummary(); // Usa currentPlayers
-
-        // Crear estructura temporal para deudas brutas
+        initializeDebtSummary();
         let grossDebts = {};
         currentPlayers.forEach(p1 => {
             grossDebts[p1] = {};
             currentPlayers.forEach(p2 => { if (p1 !== p2) grossDebts[p1][p2] = 0; });
         });
-
-        // Acumular deudas brutas desde el array `currentDebts` (caché local)
         currentDebts.forEach(debt => {
             if (grossDebts[debt.debtor] && grossDebts[debt.debtor].hasOwnProperty(debt.winner)) {
-                grossDebts[debt.debtor][debt.winner] += debt.amount;
+                // Asegurarse de que amount sea un número
+                 grossDebts[debt.debtor][debt.winner] += Number(debt.amount) || 0;
             }
         });
-
-        // Calcular deudas netas y actualizar el `summary` final
         currentPlayers.forEach(p1 => {
             currentPlayers.forEach(p2 => {
                 if (p1 === p2) return;
-
                 const amountP1toP2 = grossDebts[p1]?.[p2] || 0;
                 const amountP2toP1 = grossDebts[p2]?.[p1] || 0;
                 const netDifference = amountP1toP2 - amountP2toP1;
-
                 if (netDifference > 0) {
                     summary[p1][p2] = netDifference;
-                    // Asegurar que la deuda inversa sea cero en el resumen
-                    if(summary[p2]) summary[p2][p1] = 0;
+                    if (summary[p2]) summary[p2][p1] = 0;
+                } else {
+                    summary[p1][p2] = 0;
                 }
-                // Si la diferencia es <= 0, la deuda neta p1 -> p2 es 0
-                 else {
-                     summary[p1][p2] = 0; // Asegurar explícitamente que sea 0
-                 }
             });
         });
+         console.log("Resumen de deudas calculado:", summary); // Ayuda a depurar
     }
 
     /** Dibuja la tabla HTML (`debt-matrix`) basada en `currentPlayers` y `summary` */
     function updateDebtMatrix() {
         debtMatrixThead.innerHTML = '';
         debtMatrixTbody.innerHTML = '';
-
         if (currentPlayers.length === 0) return;
-
-        // Crear Cabecera (THEAD)
         const headerRow = debtMatrixThead.insertRow();
         const cornerTh = document.createElement('th');
-        cornerTh.innerHTML = 'Deudor ↓ / Acreedor →'; // Espacios sin ruptura
+        cornerTh.innerHTML = 'Deudor ↓ / Acreedor →';
         headerRow.appendChild(cornerTh);
         currentPlayers.forEach(player => {
             const th = document.createElement('th');
             th.textContent = player;
             headerRow.appendChild(th);
         });
-
-        // Crear Cuerpo (TBODY)
         currentPlayers.forEach(debtor => {
             const row = debtMatrixTbody.insertRow();
             const debtorHeaderCell = document.createElement('th');
             debtorHeaderCell.textContent = debtor;
             row.appendChild(debtorHeaderCell);
-
             currentPlayers.forEach(winner => {
                 const cell = row.insertCell();
                 if (debtor === winner) {
                     cell.textContent = '-';
                     cell.className = 'diagonal';
                 } else {
-                    // Obtener deuda neta DEBTOR -> WINNER del summary calculado
                     const netDebt = summary[debtor]?.[winner] || 0;
-                    cell.textContent = netDebt > 0 ? netDebt.toFixed(2) : ''; // Mostrar solo si hay deuda > 0
+                    cell.textContent = netDebt > 0 ? netDebt.toFixed(2) : '';
                     cell.className = netDebt > 0 ? 'has-debt' : 'no-debt';
                 }
             });
         });
     }
 
-    /** Reinicia el estado local (variables JS) */
+    /** Reinicia el estado local (variables JS), EXCEPTO currentGameId */
     function resetLocalState() {
-        // No borramos currentGameId aquí, se maneja por separado
+        console.log("Reseteando estado local (jugadores, deudas, summary)"); // Ayuda a depurar
         currentPlayers = [];
         currentDebts = [];
         summary = {};
         playerNameInput.value = '';
         debtAmountInput.value = '';
-        // No es necesario llamar a updatePlayerList, etc. aquí,
-        // se llaman después según el flujo (ej. después de borrar juego o iniciar uno nuevo)
+        // Limpiar lista y selects aquí también puede ser buena idea
+        playerList.innerHTML = '';
+        updateSelectOptions(); // Para resetear selects
+        updateDebtMatrix(); // Para limpiar la matriz visualmente
     }
 
     // --- Inicialización al cargar la página ---
-    loadExistingGame(); // Intenta cargar juego existente o muestra bienvenida
+     console.log("DOM Cargado. Iniciando aplicación..."); // Ayuda a depurar
+    loadExistingGame(); // Llama a la función modificada
 
 }); // Fin del DOMContentLoaded
