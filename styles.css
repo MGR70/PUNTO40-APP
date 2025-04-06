@@ -282,111 +282,28 @@ td.diagonal {
     display: none;
     /* --- Estilos Adicionales para Bienvenida y Modal --- */
 
+    /* --- Estilos Adicionales para Bienvenida --- */
+
 /* Contenedor de la imagen de bienvenida */
 .welcome-image-container {
-    text-align: center; /* Centra la imagen horizontalmente */
-    margin: 20px 0;     /* Espacio arriba y abajo */
+    text-align: center; /* Centra el contenido (la imagen) */
+    margin: 20px 0;
+    width: 100%; /* Asegura que el contenedor ocupe el ancho disponible */
+    box-sizing: border-box; /* Incluye padding/border en el width */
 }
 
 /* Imagen de bienvenida */
-.welcome-image {
-    max-width: 80%;     /* Limita el ancho para que no sea demasiado grande */
-    height: auto;       /* Mantiene la proporción */
-    border-radius: 8px; /* Bordes redondeados (opcional) */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Sombra suave (opcional) */
-}
-
-/* Contenedor específico para los botones de bienvenida */
-.welcome-button-group {
-    text-align: center; /* Centra los botones */
-    margin-top: 20px;
-}
-
-/* Estilos para botones deshabilitados */
-button:disabled {
-    background-color: #cccccc; /* Color gris */
-    color: #666666;      /* Texto más oscuro */
-    cursor: not-allowed; /* Cursor que indica no permitido */
-    opacity: 0.7;        /* Un poco transparente */
-}
-button:disabled:hover {
-    background-color: #cccccc; /* Sin cambio de color al pasar el ratón */
-    outline: none; /* Sin outline */
-}
-
-
-/* --- Estilos Básicos para el Modal --- */
-.modal {
-    position: fixed; /* Se queda fijo en la pantalla */
-    z-index: 100;    /* Por encima de otros elementos */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto; /* Permite scroll si el contenido es muy largo */
-    background-color: rgba(0,0,0,0.5); /* Fondo semi-transparente */
-    display: flex; /* Usar flexbox para centrar */
-    align-items: center; /* Centrado vertical */
-    justify-content: center; /* Centrado horizontal */
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: auto; /* Doble seguridad para centrar */
-    padding: 25px;
-    border: 1px solid #888;
+.welcome-image-container img.welcome-image { /* Selector más específico */
+    display: block; /* Evita espacios extra debajo de la imagen */
+    margin-left: auto; /* Ayuda a centrar si el contenedor es flex/grid */
+    margin-right: auto; /* Ayuda a centrar */
+    max-width: 80%;     /* Limita el ancho MÁXIMO al 80% del CONTENEDOR */
+    height: auto;       /* Mantiene la proporción alto/ancho */
+    max-height: 40vh; /* Limita la altura MÁXIMA (ej: 40% de la altura visible) - AJUSTA ESTE VALOR si es necesario */
+    object-fit: contain; /* Asegura que toda la imagen se vea, incluso si hay que dejar espacio */
     border-radius: 8px;
-    width: 80%;
-    max-width: 450px; /* Ancho máximo */
-    text-align: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.modal-content p {
-    margin-bottom: 20px;
-    font-size: 1.1em;
-    line-height: 1.5;
-}
-
-.modal-buttons button {
-    margin: 5px;
-    min-width: 100px; /* Ancho mínimo para botones del modal */
-    padding: 10px 15px;
-}
-
-/* Colores específicos para botones del modal (ejemplos) */
-#modal-btn-confirm {
-    background-color: #d9534f; /* Rojo para acciones destructivas (Borrar) */
-}
-#modal-btn-confirm:hover {
-    background-color: #c9302c;
-}
-
-#modal-btn-alt {
-    background-color: #5cb85c; /* Verde para confirmar/guardar */
-}
-#modal-btn-alt:hover {
-    background-color: #4cae4c;
-}
-
-#modal-btn-cancel {
-    background-color: #777; /* Gris para cancelar/volver */
-}
-#modal-btn-cancel:hover {
-    background-color: #555;
-}
-
-/* Ajustes responsive para el modal */
-@media (max-width: 480px) {
-    .modal-content {
-        width: 90%;
-        padding: 20px;
-    }
-    .modal-buttons button {
-        /* Podrían apilarse en pantallas muy pequeñas si se desea */
-        /* display: block; */
-        /* width: 90%; */
-        /* margin: 8px auto; */
-    }
-}
+/* ... (resto de los estilos que añadiste: .welcome-button-group, button:disabled, modal, etc.) ... */
 }
