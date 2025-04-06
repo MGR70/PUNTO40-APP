@@ -2,9 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- *** CLAVE PARA RESPONSIVE *** -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Punto 40 - Anotador (V21 Responsive)</title>
+    <title>Punto 40 - Anotador (V22 Persistente)</title> <!-- Título actualizado -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -12,9 +11,21 @@
     <div id="welcome-page" class="page">
         <h1>BIENVENIDOS AL PUNTO CUARENTA</h1>
         <p>¡A JUGAR!</p>
+
+        <!-- Contenedor para la imagen -->
+        <div class="welcome-image-container">
+            <!-- Cambia 'nombre_de_tu_imagen.jpg' al nombre real de tu archivo de imagen -->
+            <img src="bienvenida.jpg" alt="Imagen de bienvenida del juego Punto 40" class="welcome-image">
+        </div>
+
         <p>No harán trampa 😉</p>
-        <button id="start-game">Iniciar Juego</button>
-        <button id="continue-game" style="display: none;">Continuar Último Juego</button>
+
+        <!-- Contenedor para centrar los botones de bienvenida -->
+        <div class="welcome-button-group">
+            <button id="start-game">Iniciar Nuevo Juego</button>
+            <!-- El botón continuar ahora se habilita/deshabilita con JS -->
+            <button id="continue-game" disabled>Continuar Último Juego</button>
+        </div>
     </div>
 
     <!-- Página de Registro de Jugadores -->
@@ -23,14 +34,12 @@
         <div class="form-group">
             <label for="player-name">Nombre:</label>
             <input type="text" id="player-name" placeholder="Nombre del jugador">
-             <!-- Contenedor para botones de registro -->
             <div class="button-group">
                  <button id="register-player">Registrar Jugador</button>
             </div>
         </div>
         <h3>Jugadores Registrados</h3>
         <ul id="player-list"></ul>
-         <!-- Contenedor para botones de navegación -->
         <div class="button-group">
             <button id="finish-registration">Ir al Registro de Deudas</button>
         </div>
@@ -40,7 +49,6 @@
     <div id="register-debts-page" class="page" style="display: none;">
         <h2>Registro y Resumen de Deudas</h2>
 
-        <!-- Formulario para Registrar Deuda -->
         <div id="debt-form">
              <h3>Registrar Nueva Deuda</h3>
             <div class="form-group">
@@ -55,15 +63,13 @@
                 <label for="debt-amount">Monto:</label>
                 <input type="number" id="debt-amount" placeholder="Monto" min="1">
              </div>
-              <!-- Contenedor para botones de acción -->
              <div class="button-group">
                 <button id="register-debt">Registrar Deuda</button>
              </div>
         </div>
 
-        <hr> <!-- Separador visual -->
+        <hr>
 
-        <!-- Matriz Resumen de Deudas -->
         <h3>Resumen de Deudas Netas</h3>
         <p class="table-instructions">(Desliza la tabla horizontalmente si es necesario)</p>
         <div class="table-container">
@@ -73,17 +79,28 @@
              </table>
         </div>
 
+        <hr>
 
-        <hr> <!-- Separador visual -->
-
-        <!-- Controles del Juego -->
-        <div class="game-controls button-group"> <!-- Añadido button-group -->
+        <div class="game-controls button-group">
             <button id="add-new-player">Agregar Más Jugadores</button>
-            <button id="end-game">Finalizar Juego</button>
+            <button id="end-game">Finalizar Juego</button> <!-- El texto no cambia, la lógica sí -->
         </div>
     </div>
 
-    <!-- El JS no cambia -->
+    <!-- Modales personalizados para confirmaciones (opcional pero mejor UI) -->
+    <!-- Este es un ejemplo simple, puedes estilizarlo más -->
+    <div id="custom-confirm-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="modal-message">¿Mensaje?</p>
+            <div class="modal-buttons">
+                <button id="modal-btn-confirm">Confirmar</button>
+                <button id="modal-btn-alt">Alternativa</button>
+                <button id="modal-btn-cancel">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+
     <script src="script.js"></script>
 </body>
 </html>
