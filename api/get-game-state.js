@@ -1,49 +1,47 @@
 // api/get-game-state.js
 import { neon } from '@neondatabase/serverless';
 
-export default async (req, res) => {
-     // Permitir solo GET
-     if (req.method !== 'GET') {
-        return res.status(405).json({ message: 'Method Not Allowed' });
+export const config = {
+  runtime: 'edge',
+};
+
+export default async (request) => { // Cambiado a (request)
+     if (request.method !== 'GET') {
+        return new Response(JSON.stringify({ message: 'Method Not Allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
     }
 
     try {
-        // Obtener gameId de los parámetros de la URL (ej: /api/get-game-state?gameId=...)
-        // Vercel pone los query params en req.searchParams con runtime edge
-         const url = new URL(req.url, `http://${req.headers.host}`); // Necesitamos la URL completa
+        // Obtener query params de la URL
+         const url = new URL(request.url);
          const gameId = url.searchParams.get('gameId');
 
-
         if (!gameId) {
-            return res.status(400).json({ message: 'Game ID is required' });
+            return new Response(JSON.stringify({ message: 'Game ID is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
 
         const sql = neon(process.env.DATABASE_URL);
-
-        // Ejecutar ambas consultas en paralelo para eficiencia
         const [playersResult, debtsResult] = await Promise.all([
             sql`SELECT name FROM players WHERE game_id = ${gameId} ORDER BY created_at ASC`,
             sql`SELECT debtor_name, winner_name, amount FROM debts WHERE game_id = ${gameId} ORDER BY created_at ASC`
         ]);
 
-        // Extraer solo los nombres de los jugadores
         const players = playersResult.map(p => p.name);
-        // Mapear las deudas al formato que usa el frontend
         const debts = debtsResult.map(d => ({
             debtor: d.debtor_name,
             winner: d.winner_name,
-            amount: parseFloat(d.amount) // Asegurarse que sea número
+            amount: parseFloat(d.amount)
         }));
 
-        // Devolver el estado completo del juego
-        return res.status(200).json({ players, debts });
+        return new Response(JSON.stringify({ players, debts }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+        });
 
     } catch (error) {
         console.error('Error getting game state:', error);
-        return res.status(500).json({ message: 'Error fetching game state', error: error.message });
+        return new Response(JSON.stringify({ message: 'Error fetching game state', error: error.message }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+        });
     }
-};
-
-export const config = {
-  runtime: 'edge',
 };

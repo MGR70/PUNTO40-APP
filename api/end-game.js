@@ -1,39 +1,33 @@
 // api/end-game.js
 import { neon } from '@neondatabase/serverless';
 
-export default async (req, res) => {
-    // Usaremos POST para la acción de borrar, aunque DELETE sería más semántico,
-    // es más simple enviar el gameId en el body con POST desde JS básico.
-     if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Method Not Allowed' });
+export const config = {
+  runtime: 'edge',
+};
+
+export default async (request) => { // Cambiado a (request)
+     if (request.method !== 'POST') { // Mantenemos POST por simplicidad
+        return new Response(JSON.stringify({ message: 'Method Not Allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
     }
 
     try {
-        const { gameId } = await req.json();
+        const { gameId } = await request.json(); // Leer body
 
         if (!gameId) {
-            return res.status(400).json({ message: 'Game ID is required' });
+            return new Response(JSON.stringify({ message: 'Game ID is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
 
         const sql = neon(process.env.DATABASE_URL);
-
-        // Borrar el juego. Gracias a "ON DELETE CASCADE",
-        // esto borrará también los jugadores y deudas asociados.
         const result = await sql`DELETE FROM games WHERE id = ${gameId}`;
 
         if (result.rowCount > 0) {
-            return res.status(200).json({ success: true, message: 'Game ended and data deleted.' });
+            return new Response(JSON.stringify({ success: true, message: 'Game ended and data deleted.' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
         } else {
-            // Si rowCount es 0, el juego no existía (quizás ya se borró)
-            return res.status(404).json({ success: false, message: 'Game not found.' });
+            return new Response(JSON.stringify({ success: false, message: 'Game not found.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
         }
 
     } catch (error) {
         console.error('Error ending game:', error);
-        return res.status(500).json({ message: 'Error ending game', error: error.message });
+         return new Response(JSON.stringify({ message: 'Error ending game', error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
-};
-
-export const config = {
-  runtime: 'edge',
 };

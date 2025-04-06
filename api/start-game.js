@@ -1,31 +1,37 @@
 // api/start-game.js
 import { neon } from '@neondatabase/serverless';
 
-// Exporta la función que Vercel ejecutará
-export default async (req, res) => {
+export const config = {
+  runtime: 'edge', // Mantenemos el runtime edge
+};
+
+export default async (request) => { // Cambiado de (req, res) a (request)
     // Solo permitir método POST
-    if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Method Not Allowed' });
+    if (request.method !== 'POST') {
+        // Cambiada la forma de responder
+        return new Response(JSON.stringify({ message: 'Method Not Allowed' }), {
+            status: 405,
+            headers: { 'Content-Type': 'application/json' },
+        });
     }
 
     try {
-        // Conectar a la base de datos usando la variable de entorno
         const sql = neon(process.env.DATABASE_URL);
-
-        // Insertar un nuevo juego y obtener su ID
         const result = await sql`INSERT INTO games DEFAULT VALUES RETURNING id`;
         const newGameId = result[0].id;
 
-        // Devolver el ID del nuevo juego al frontend
-        return res.status(201).json({ gameId: newGameId });
+        // Cambiada la forma de responder
+        return new Response(JSON.stringify({ gameId: newGameId }), {
+            status: 201,
+            headers: { 'Content-Type': 'application/json' },
+        });
 
     } catch (error) {
         console.error('Error starting game:', error);
-        return res.status(500).json({ message: 'Error starting new game', error: error.message });
+         // Cambiada la forma de responder
+        return new Response(JSON.stringify({ message: 'Error starting new game', error: error.message }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+        });
     }
-};
-
-// Configuración para Vercel (importante para Neon)
-export const config = {
-  runtime: 'edge', // Usa el runtime edge de Vercel, bueno para BD
 };
