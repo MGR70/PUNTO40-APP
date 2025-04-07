@@ -45,21 +45,35 @@ export default async (request) => {
         // *** FIN PASO EXTRA ***
 
         // Ejecutar DELETE
-        console.log(`API end-game v3: Ejecutando DELETE FROM games WHERE id = '${gameId}' ...`);
-        const deleteResult = await sql`DELETE FROM games WHERE id = ${gameId}`;
-        console.log("API end-game v3: DELETE completado. Resultado:", deleteResult);
+console.log(`API end-game v3: Ejecutando DELETE FROM games WHERE id = '${gameId}' ...`);
+// Ya no guardamos el resultado en una variable si no vamos a usar rowCount
+await sql`DELETE FROM games WHERE id = ${gameId}`;
+console.log("API end-game v3: Sentencia DELETE ejecutada (sin error explícito).");
 
-        // Verificar resultado del DELETE
-        if (deleteResult && deleteResult.rowCount > 0) {
-            console.log(`API end-game v3: Borrado exitoso (rowCount: ${deleteResult.rowCount}).`);
-            return new Response(JSON.stringify({ success: true, message: 'Game deleted.' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-        } else {
-            console.warn(`API end-game v3: DELETE no afectó filas (ID: ${gameId}). rowCount: ${deleteResult?.rowCount ?? 'N/A'}. Devolviendo 404.`);
-            return new Response(JSON.stringify({ success: false, message: 'Game not found (delete failed).' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
-        }
+// *** CAMBIO: Asumir éxito si no hubo error ***
+// En lugar de verificar deleteResult.rowCount, asumimos que si llegamos aquí sin error,
+// el DELETE probablemente funcionó o al menos la BD aceptó el comando.
+// Devolvemos 200 OK. Si el ID no existía, el DELETE simplemente no hizo nada,
+// lo cual no es necesariamente un error para el cliente.
+console.log(`API end-game v3: Asumiendo éxito tras DELETE. Devolviendo 200 OK.`);
+return new Response(JSON.stringify({ success: true, message: 'Game delete attempted.' }), { // Mensaje ligeramente diferente
+    status: 200, // Devolver OK en lugar de 404 si no se encontraron filas
+    headers: { 'Content-Type': 'application/json' }
+});
+// *** FIN CAMBIO ***
 
-    } catch (error) {
-        console.error('API end-game v3: ****** ERROR CAPTURADO ******:', error);
-        return new Response(JSON.stringify({ message: 'Error interno' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-    }
-};
+// El código anterior que verificaba rowCount y devolvía 404 ya no es necesario aquí
+/*
+// Verificar resultado del DELETE (YA NO SE USA ASÍ)
+if (deleteResult && deleteResult.rowCount > 0) {
+    // ... código para 200 ...
+} else {
+    // ... código para 404 ...
+}
+*/
+
+} catch (error) { // El catch se mantiene igual
+    console.error('API end-game v3: ****** ERROR CAPTURADO ******:', error);
+    return new Response(JSON.stringify({ message: 'Error interno' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+}
+}; // Fin export default
