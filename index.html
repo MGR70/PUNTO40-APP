@@ -88,9 +88,17 @@
         </div>
     </div>
 
-    <!-- El Modal no se usará en esta versión, pero puede quedarse en el HTML -->
-    <div id="custom-confirm-modal" class="modal" style="display: none;">
-        <!-- ... contenido del modal ... -->
+      <!-- Modales personalizados para confirmaciones -->
+      <div id="custom-confirm-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="modal-message">¿Mensaje de prueba?</p> <!-- Párrafo para el mensaje -->
+            <div class="modal-buttons">
+                 <!-- Los 3 botones que usaremos -->
+                <button id="modal-btn-confirm">Confirmar</button>
+                <button id="modal-btn-alt">Alternativa</button>
+                <button id="modal-btn-cancel">Cancelar</button>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
