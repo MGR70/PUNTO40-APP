@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Punto 40 - Anotador (V22 Persistente)</title> <!-- Título actualizado -->
+    <title>Punto 40 - Anotador (Checkpoint Persistente)</title> <!-- Título ajustado -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,7 +14,7 @@
 
         <!-- Contenedor para la imagen -->
         <div class="welcome-image-container">
-            <!-- Cambia 'nombre_de_tu_imagen.jpg' al nombre real de tu archivo de imagen -->
+            <!-- Asegúrate que el nombre 'bienvenida.jpg' coincida con tu archivo -->
             <img src="bienvenida.jpg" alt="Imagen de bienvenida del juego Punto 40" class="welcome-image">
         </div>
 
@@ -23,7 +23,7 @@
         <!-- Contenedor para centrar los botones de bienvenida -->
         <div class="welcome-button-group">
             <button id="start-game">Iniciar Nuevo Juego</button>
-            <!-- El botón continuar ahora se habilita/deshabilita con JS -->
+            <!-- Este botón existe en el HTML pero el JS de checkpoint no le asignará acción -->
             <button id="continue-game" disabled>Continuar Último Juego</button>
         </div>
     </div>
@@ -83,23 +83,15 @@
 
         <div class="game-controls button-group">
             <button id="add-new-player">Agregar Más Jugadores</button>
-            <button id="end-game">Finalizar Juego</button> <!-- El texto no cambia, la lógica sí -->
+            <!-- Botón Finalizar usará confirm() simple -->
+            <button id="end-game">Finalizar Juego</button>
         </div>
     </div>
 
-    <!-- Modales personalizados para confirmaciones (opcional pero mejor UI) -->
-    <!-- Este es un ejemplo simple, puedes estilizarlo más -->
+    <!-- El Modal no se usará en esta versión, pero puede quedarse en el HTML -->
     <div id="custom-confirm-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <p id="modal-message">¿Mensaje?</p>
-            <div class="modal-buttons">
-                <button id="modal-btn-confirm">Confirmar</button>
-                <button id="modal-btn-alt">Alternativa</button>
-                <button id="modal-btn-cancel">Cancelar</button>
-            </div>
-        </div>
+        <!-- ... contenido del modal ... -->
     </div>
-
 
     <script src="script.js"></script>
 </body>
