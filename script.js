@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     // --- FIN Helper ---
+
 // --- INICIO: Lógica del Modal Personalizado (AÑADIR ESTE BLOQUE) ---
 let modalActionResolver = null; // Variable para manejar la promesa del modal
 
@@ -108,6 +109,7 @@ if(modalBtnAltForListener) modalBtnAltForListener.addEventListener('click', () =
 if(modalBtnCancelForListener) modalBtnCancelForListener.addEventListener('click', () => { if (modalActionResolver) modalActionResolver('cancel'); if(modalElementForListener) modalElementForListener.style.display = 'none'; });
 if(modalElementForListener) modalElementForListener.addEventListener('click', (event) => { if (event.target === modalElementForListener) { if (modalActionResolver) modalActionResolver('cancel'); modalElementForListener.style.display = 'none'; } });
 // --- FIN: Lógica del Modal ---
+
     // --- Lógica de Inicio y Carga (MODIFICADA - Sin confirm()) ---
     function checkAndSetContinueButton() {
         const savedGameId = localStorage.getItem('currentGameId');
@@ -308,5 +310,35 @@ endGameButton.addEventListener('click', async () => {
        console.log("endGameButton: Eligió Volver al Juego o cerró modal 1.");
    }
 });
+
 // --- FIN: Lógica de Finalización ---
+
+    // --- Funciones Auxiliares ---
+    function showPage(pageIdToShow) {
+        // console.log(`--- showPage: Mostrando ${pageIdToShow} ---`); // Log reducido
+        document.querySelectorAll('.page').forEach(page => { if (page && page.style) page.style.display = page.id === pageIdToShow ? 'block' : 'none'; });
+    }
+    function updatePlayerList() { if (!playerList) return; playerList.innerHTML = ''; currentPlayers.forEach(player => { const li = document.createElement('li'); li.textContent = player; playerList.appendChild(li); }); }
+    function updateSelectOptions() {
+         if (!debtorSelect || !winnerSelect) { console.error("updateSelectOptions: Selects no encontrados!"); return; }
+        const currentDebtor = debtorSelect.value; const currentWinner = winnerSelect.value;
+        debtorSelect.innerHTML = ''; winnerSelect.innerHTML = '';
+        const defaultOption = document.createElement('option'); defaultOption.value = ""; defaultOption.textContent = "-- Selecciona Jugador --"; defaultOption.disabled = true;
+        debtorSelect.appendChild(defaultOption.cloneNode(true)); winnerSelect.appendChild(defaultOption.cloneNode(true));
+        // console.log(`updateSelectOptions: Añadiendo ${currentPlayers.length} jugadores.`); // Log reducido
+        currentPlayers.forEach(player => { const option = document.createElement('option'); option.value = player; option.textContent = player; debtorSelect.appendChild(option.cloneNode(true)); winnerSelect.appendChild(option.cloneNode(true)); });
+        debtorSelect.value = currentPlayers.includes(currentDebtor) ? currentDebtor : ""; winnerSelect.value = currentPlayers.includes(currentWinner) ? currentWinner : "";
+        if (!debtorSelect.value) debtorSelect.value = ""; if (!winnerSelect.value) winnerSelect.value = "";
+        // console.log(`updateSelectOptions: Finalizado.`); // Log reducido
+    }
+    function initializeDebtSummary() { summary = {}; currentPlayers.forEach(p1 => { summary[p1] = {}; currentPlayers.forEach(p2 => { if (p1 !== p2) summary[p1][p2] = 0; }); }); }
+    function calculateDebtSummary() { initializeDebtSummary(); let grossDebts = {}; currentPlayers.forEach(p1 => { grossDebts[p1] = {}; currentPlayers.forEach(p2 => { if (p1 !== p2) grossDebts[p1][p2] = 0; }); }); currentDebts.forEach(debt => { if (grossDebts[debt.debtor] && grossDebts[debt.debtor].hasOwnProperty(debt.winner)) { grossDebts[debt.debtor][debt.winner] += Number(debt.amount) || 0; } }); currentPlayers.forEach(p1 => { currentPlayers.forEach(p2 => { if (p1 === p2) return; const amountP1toP2 = grossDebts[p1]?.[p2] || 0; const amountP2toP1 = grossDebts[p2]?.[p1] || 0; const netDifference = amountP1toP2 - amountP2toP1; if (netDifference > 0) { summary[p1][p2] = netDifference; if (summary[p2]) summary[p2][p1] = 0; } else { summary[p1][p2] = 0; } }); }); }
+    function updateDebtMatrix() { if (!debtMatrixThead || !debtMatrixTbody) return; debtMatrixThead.innerHTML = ''; debtMatrixTbody.innerHTML = ''; if (currentPlayers.length === 0) return; const headerRow = debtMatrixThead.insertRow(); const cornerTh = document.createElement('th'); cornerTh.innerHTML = 'Deudor ↓ / Acreedor →'; headerRow.appendChild(cornerTh); currentPlayers.forEach(player => { const th = document.createElement('th'); th.textContent = player; headerRow.appendChild(th); }); currentPlayers.forEach(debtor => { const row = debtMatrixTbody.insertRow(); const debtorHeaderCell = document.createElement('th'); debtorHeaderCell.textContent = debtor; row.appendChild(debtorHeaderCell); currentPlayers.forEach(winner => { const cell = row.insertCell(); if (debtor === winner) { cell.textContent = '-'; cell.className = 'diagonal'; } else { const netDebt = summary[debtor]?.[winner] || 0; cell.textContent = netDebt > 0 ? netDebt.toFixed(2) : ''; cell.className = netDebt > 0 ? 'has-debt' : 'no-debt'; } }); }); }
+    function resetLocalState() { console.log("resetLocalState ejecutado."); currentPlayers = []; currentDebts = []; summary = {}; if(playerNameInput) playerNameInput.value = ''; if(debtAmountInput) debtAmountInput.value = ''; if(playerList) playerList.innerHTML = ''; updateSelectOptions(); updateDebtMatrix(); }
+
+    // --- Inicialización Final ---
+    console.log("Inicialización JS v14 (Bienvenida Mejorada) completada. Llamando a checkAndSetContinueButton...");
+    checkAndSetContinueButton(); // Llama a la función de bienvenida mejorada
+
+}); // Fin del DOMContentLoaded
 // ----- FIN CÓDIGO script.js COMPLETO (v14 - Restaurada) -----
