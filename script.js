@@ -61,7 +61,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     // --- FIN Helper ---
+// --- INICIO: Lógica del Modal Personalizado (AÑADIR ESTE BLOQUE) ---
+let modalActionResolver = null; // Variable para manejar la promesa del modal
 
+function showCustomConfirm(message, confirmText, altText, cancelText) {
+    console.log(`showCustomConfirm: Mostrando modal. Mensaje: "${message}"`);
+    // Referenciar elementos del modal (asumimos que ya están definidos globalmente o hacer getElementById aquí)
+    const modal = document.getElementById('custom-confirm-modal');
+    const modalMessage = document.getElementById('modal-message');
+    const modalBtnConfirm = document.getElementById('modal-btn-confirm');
+    const modalBtnAlt = document.getElementById('modal-btn-alt');
+    const modalBtnCancel = document.getElementById('modal-btn-cancel');
+
+    return new Promise((resolve) => {
+        if (!modal || !modalMessage || !modalBtnConfirm || !modalBtnAlt || !modalBtnCancel) {
+            console.error("showCustomConfirm: Faltan elementos del modal!");
+            resolve('error'); return;
+        }
+
+        modalMessage.textContent = message;
+
+        modalBtnConfirm.textContent = confirmText;
+        modalBtnConfirm.style.display = confirmText ? 'inline-block' : 'none';
+
+        modalBtnAlt.textContent = altText;
+        modalBtnAlt.style.display = altText ? 'inline-block' : 'none';
+
+        modalBtnCancel.textContent = cancelText || 'Cancelar';
+        modalBtnCancel.style.display = (cancelText !== null) ? 'inline-block' : 'none';
+
+        modal.style.display = 'flex';
+
+        modalActionResolver = resolve;
+    });
+}
+
+// Listeners para botones del modal (AÑADIR ESTE BLOQUE)
+// Asegurarse que los botones existen antes de añadir listeners
+const modalElementForListener = document.getElementById('custom-confirm-modal');
+const modalBtnConfirmForListener = document.getElementById('modal-btn-confirm');
+const modalBtnAltForListener = document.getElementById('modal-btn-alt');
+const modalBtnCancelForListener = document.getElementById('modal-btn-cancel');
+
+if(modalBtnConfirmForListener) modalBtnConfirmForListener.addEventListener('click', () => { if (modalActionResolver) modalActionResolver('confirm'); if(modalElementForListener) modalElementForListener.style.display = 'none'; });
+if(modalBtnAltForListener) modalBtnAltForListener.addEventListener('click', () => { if (modalActionResolver) modalActionResolver('alt'); if(modalElementForListener) modalElementForListener.style.display = 'none'; });
+if(modalBtnCancelForListener) modalBtnCancelForListener.addEventListener('click', () => { if (modalActionResolver) modalActionResolver('cancel'); if(modalElementForListener) modalElementForListener.style.display = 'none'; });
+if(modalElementForListener) modalElementForListener.addEventListener('click', (event) => { if (event.target === modalElementForListener) { if (modalActionResolver) modalActionResolver('cancel'); modalElementForListener.style.display = 'none'; } });
+// --- FIN: Lógica del Modal ---
     // --- Lógica de Inicio y Carga (MODIFICADA - Sin confirm()) ---
     function checkAndSetContinueButton() {
         const savedGameId = localStorage.getItem('currentGameId');
@@ -199,48 +245,68 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error("registerDebtButton: Error:", error); }
     });
 
-    // --- Lógica de Finalización (confirm() simple - Checkpoint) ---
-    endGameButton.addEventListener('click', async () => {
-         if (!currentGameId) { alert("No hay juego activo."); return; }
-        // console.log("endGameButton: Presionado."); // Log reducido
-        console.log(`endGameButton: ID del juego a finalizar: ${currentGameId}`);
-        if (confirm('¿Estás seguro de que deseas finalizar y BORRAR permanentemente los datos de este juego?')) {
-             // console.log("endGameButton: Usuario confirma borrado."); // Log reducido
-             try {
-                 await apiRequest('end-game', 'POST', { gameId: currentGameId });
-             } catch (error) { console.error("endGameButton: Error API (puede ser normal si ya no existe):", error); }
-             localStorage.removeItem('currentGameId'); currentGameId = null; resetLocalState();
-             if(continueGameButton) continueGameButton.disabled = true;
-             showPage('welcome-page');
-        } else { /* console.log("endGameButton: Usuario canceló borrado."); */ } // Log reducido
-    });
-
-    // --- Funciones Auxiliares ---
-    function showPage(pageIdToShow) {
-        // console.log(`--- showPage: Mostrando ${pageIdToShow} ---`); // Log reducido
-        document.querySelectorAll('.page').forEach(page => { if (page && page.style) page.style.display = page.id === pageIdToShow ? 'block' : 'none'; });
+    // --- INICIO: Lógica de Finalización (MODIFICADA para usar Modal) ---
+endGameButton.addEventListener('click', async () => {
+    // Verificar si hay juego activo
+    if (!currentGameId) {
+        alert("No hay ningún juego activo para finalizar.");
+        return;
     }
-    function updatePlayerList() { if (!playerList) return; playerList.innerHTML = ''; currentPlayers.forEach(player => { const li = document.createElement('li'); li.textContent = player; playerList.appendChild(li); }); }
-    function updateSelectOptions() {
-         if (!debtorSelect || !winnerSelect) { console.error("updateSelectOptions: Selects no encontrados!"); return; }
-        const currentDebtor = debtorSelect.value; const currentWinner = winnerSelect.value;
-        debtorSelect.innerHTML = ''; winnerSelect.innerHTML = '';
-        const defaultOption = document.createElement('option'); defaultOption.value = ""; defaultOption.textContent = "-- Selecciona Jugador --"; defaultOption.disabled = true;
-        debtorSelect.appendChild(defaultOption.cloneNode(true)); winnerSelect.appendChild(defaultOption.cloneNode(true));
-        // console.log(`updateSelectOptions: Añadiendo ${currentPlayers.length} jugadores.`); // Log reducido
-        currentPlayers.forEach(player => { const option = document.createElement('option'); option.value = player; option.textContent = player; debtorSelect.appendChild(option.cloneNode(true)); winnerSelect.appendChild(option.cloneNode(true)); });
-        debtorSelect.value = currentPlayers.includes(currentDebtor) ? currentDebtor : ""; winnerSelect.value = currentPlayers.includes(currentWinner) ? currentWinner : "";
-        if (!debtorSelect.value) debtorSelect.value = ""; if (!winnerSelect.value) winnerSelect.value = "";
-        // console.log(`updateSelectOptions: Finalizado.`); // Log reducido
-    }
-    function initializeDebtSummary() { summary = {}; currentPlayers.forEach(p1 => { summary[p1] = {}; currentPlayers.forEach(p2 => { if (p1 !== p2) summary[p1][p2] = 0; }); }); }
-    function calculateDebtSummary() { initializeDebtSummary(); let grossDebts = {}; currentPlayers.forEach(p1 => { grossDebts[p1] = {}; currentPlayers.forEach(p2 => { if (p1 !== p2) grossDebts[p1][p2] = 0; }); }); currentDebts.forEach(debt => { if (grossDebts[debt.debtor] && grossDebts[debt.debtor].hasOwnProperty(debt.winner)) { grossDebts[debt.debtor][debt.winner] += Number(debt.amount) || 0; } }); currentPlayers.forEach(p1 => { currentPlayers.forEach(p2 => { if (p1 === p2) return; const amountP1toP2 = grossDebts[p1]?.[p2] || 0; const amountP2toP1 = grossDebts[p2]?.[p1] || 0; const netDifference = amountP1toP2 - amountP2toP1; if (netDifference > 0) { summary[p1][p2] = netDifference; if (summary[p2]) summary[p2][p1] = 0; } else { summary[p1][p2] = 0; } }); }); }
-    function updateDebtMatrix() { if (!debtMatrixThead || !debtMatrixTbody) return; debtMatrixThead.innerHTML = ''; debtMatrixTbody.innerHTML = ''; if (currentPlayers.length === 0) return; const headerRow = debtMatrixThead.insertRow(); const cornerTh = document.createElement('th'); cornerTh.innerHTML = 'Deudor ↓ / Acreedor →'; headerRow.appendChild(cornerTh); currentPlayers.forEach(player => { const th = document.createElement('th'); th.textContent = player; headerRow.appendChild(th); }); currentPlayers.forEach(debtor => { const row = debtMatrixTbody.insertRow(); const debtorHeaderCell = document.createElement('th'); debtorHeaderCell.textContent = debtor; row.appendChild(debtorHeaderCell); currentPlayers.forEach(winner => { const cell = row.insertCell(); if (debtor === winner) { cell.textContent = '-'; cell.className = 'diagonal'; } else { const netDebt = summary[debtor]?.[winner] || 0; cell.textContent = netDebt > 0 ? netDebt.toFixed(2) : ''; cell.className = netDebt > 0 ? 'has-debt' : 'no-debt'; } }); }); }
-    function resetLocalState() { console.log("resetLocalState ejecutado."); currentPlayers = []; currentDebts = []; summary = {}; if(playerNameInput) playerNameInput.value = ''; if(debtAmountInput) debtAmountInput.value = ''; if(playerList) playerList.innerHTML = ''; updateSelectOptions(); updateDebtMatrix(); }
+    console.log("endGameButton: Presionado. Mostrando modal 1.");
 
-    // --- Inicialización Final ---
-    console.log("Inicialización JS v14 (Bienvenida Mejorada) completada. Llamando a checkAndSetContinueButton...");
-    checkAndSetContinueButton(); // Llama a la función de bienvenida mejorada
+    // 1. Mostrar primer modal para elegir acción
+   const choice1 = await showCustomConfirm(
+       '¿Qué deseas hacer con este juego?',      // Mensaje
+       'Descartar Juego (Borrar Datos)',   // Texto Botón Confirm (rojo)
+       'Guardar y Salir',                  // Texto Botón Alt (verde)
+       'Volver al Juego'                   // Texto Botón Cancel (gris)
+   );
 
-}); // Fin del DOMContentLoaded
+   console.log("endGameButton: Respuesta Modal 1:", choice1);
+
+   // --- Acción basada en la elección del usuario ---
+
+   if (choice1 === 'alt') { // Eligió "Guardar y Salir"
+       console.log("endGameButton: Eligió Guardar y Salir. Navegando a bienvenida.");
+       // Simplemente ir a bienvenida. El ID ya está en localStorage.
+        checkAndSetContinueButton(); // Llama a la función que habilita/deshabilita y muestra bienvenida
+
+   } else if (choice1 === 'confirm') { // Eligió "Descartar Juego (Borrar Datos)"
+       console.log("endGameButton: Eligió Descartar. Mostrando modal 2 (confirmación).");
+
+       // 2. Mostrar segundo modal para confirmar borrado
+       const choice2 = await showCustomConfirm(
+           '¿Estás SEGURO de que quieres borrar permanentemente todos los datos de este juego? Esta acción no se puede deshacer.', // Mensaje de confirmación fuerte
+           'Sí, Borrar Definitivamente',  // Texto Botón Confirm (rojo)
+           null,                          // Sin botón Alt en esta confirmación
+           'Cancelar'                     // Texto Botón Cancel (gris)
+       );
+
+       console.log("endGameButton: Respuesta Modal 2:", choice2);
+
+       if (choice2 === 'confirm') { // Confirmó el borrado definitivo
+           console.log(`endGameButton: Confirmó borrado. Intentando API /api/end-game para ${currentGameId}`);
+           try {
+               // Llama a la API para borrar (usando la versión corregida de la API que asume éxito si no hay error)
+               await apiRequest('end-game', 'POST', { gameId: currentGameId });
+               console.log("endGameButton: API end-game ejecutada (asumiendo éxito).");
+           } catch (error) {
+               console.error("endGameButton: Error en llamada API end-game:", error);
+           } finally {
+                // Limpiar siempre localmente después de intentar borrar
+               console.log("endGameButton: Limpiando estado local tras intento de borrado...");
+               localStorage.removeItem('currentGameId');
+               currentGameId = null;
+               resetLocalState(); // Limpia variables y UI relacionada
+               if(continueGameButton) continueGameButton.disabled = true; // Deshabilitar botón Continuar
+               showPage('welcome-page'); // Mostrar bienvenida
+           }
+       } else { // Canceló el borrado definitivo
+           console.log("endGameButton: Canceló el borrado definitivo. Volviendo al juego.");
+       }
+   } else { // Eligió "Volver al Juego" o cerró el primer modal
+       console.log("endGameButton: Eligió Volver al Juego o cerró modal 1.");
+   }
+});
+// --- FIN: Lógica de Finalización ---
 // ----- FIN CÓDIGO script.js COMPLETO (v14 - Restaurada) -----
