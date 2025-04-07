@@ -203,6 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
     endGameButton.addEventListener('click', async () => {
          if (!currentGameId) { alert("No hay juego activo."); return; }
         // console.log("endGameButton: Presionado."); // Log reducido
+        console.log(`endGameButton: ID del juego a finalizar: ${currentGameId}`);
         if (confirm('¿Estás seguro de que deseas finalizar y BORRAR permanentemente los datos de este juego?')) {
              // console.log("endGameButton: Usuario confirma borrado."); // Log reducido
              try {
