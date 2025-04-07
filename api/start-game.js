@@ -1,23 +1,21 @@
-// api/start-game.js (VERSIÓN DE PRUEBA SIMPLE)
-export const config = {
-    runtime: 'edge',
-  };
-  
-  export default async (request) => {
-      // Log para ver si se ejecuta
-      console.log("API start-game (SIMPLE TEST): Función ejecutada.");
-  
-      if (request.method !== 'POST') {
-          console.log("API start-game (SIMPLE TEST): Método no es POST.");
-          return new Response(JSON.stringify({ message: 'Method Not Allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
-      }
-  
-      // Devolver un ID de juego falso directamente
-      const fakeGameId = 'test-12345-abcde';
-      console.log(`API start-game (SIMPLE TEST): Devolviendo ID falso: ${fakeGameId}`);
-  
-      return new Response(JSON.stringify({ gameId: fakeGameId }), {
-          status: 201, // Usamos 201 como si fuera creado
-          headers: { 'Content-Type': 'application/json' },
-      });
-  };
+// api/start-game.js (PRUEBA NODE.JS SIMPLE)
+// NO hay 'export const config...'
+
+// Usamos 'req' y 'res'
+export default function handler(req, res) {
+    // Log para ver si se ejecuta (¡Ahora debería aparecer en Vercel!)
+    console.log("API start-game (NODE TEST): Función ejecutada.");
+
+    if (req.method !== 'POST') {
+        console.log("API start-game (NODE TEST): Método no POST.");
+        res.setHeader('Allow', ['POST']);
+        // Usamos res.status().json()
+        return res.status(405).json({ message: 'Method Not Allowed' });
+    }
+
+    const fakeGameId = 'test-nodejs-67890';
+    console.log(`API start-game (NODE TEST): Devolviendo ID falso: ${fakeGameId}`);
+
+    // Usamos res.status().json()
+    return res.status(201).json({ gameId: fakeGameId });
+}
