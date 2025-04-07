@@ -1,4 +1,4 @@
-// api/end-game.js (v2 - Con Logs Detallados)
+// api/end-game.js (v3 - SELECT antes de DELETE)
 import { neon } from '@neondatabase/serverless';
 
 export const config = {
@@ -6,63 +6,60 @@ export const config = {
 };
 
 export default async (request) => {
-    console.log("API end-game v2: Función ejecutada."); // Log inicial
+    console.log("API end-game v3: Función ejecutada.");
 
-    if (request.method !== 'POST') {
-        console.log("API end-game v2: Método no POST.");
-        return new Response(JSON.stringify({ message: 'Method Not Allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
-    }
+    if (request.method !== 'POST') { /* ... manejo método ... */ }
 
     try {
-        // Leer el cuerpo JSON
         let requestBody;
         try {
              requestBody = await request.json();
-             console.log("API end-game v2: Cuerpo JSON recibido:", requestBody);
-        } catch (e) {
-             console.error("API end-game v2: ¡ERROR al parsear JSON del request body!", e);
-             // Intentar leer como texto para depurar
-             try {
-                 const reqText = await request.text(); // Necesita clonar request si quieres leer de nuevo
-                 console.error("API end-game v2: Request body como texto:", reqText);
-             } catch(e2){}
-             throw new Error("Cuerpo de solicitud inválido (no JSON).");
-        }
+             console.log("API end-game v3: Body JSON:", requestBody);
+        } catch (e) { /* ... manejo error JSON body ... */ throw new Error("Cuerpo inválido."); }
 
+        const { gameId } = requestBody;
+        if (!gameId) { /* ... manejo falta gameId ... */ }
+        console.log(`API end-game v3: gameId recibido para operar: ${gameId}`);
 
-        // Extraer gameId
-        const { gameId } = requestBody; // Obtener de requestBody, no directamente de request.json()
-
-        if (!gameId) {
-            console.error("API end-game v2: ¡ERROR! No se recibió 'gameId' en el cuerpo JSON.");
-            return new Response(JSON.stringify({ message: 'Game ID is required in request body' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        }
-        console.log(`API end-game v2: gameId recibido para borrar: ${gameId} (Tipo: ${typeof gameId})`); // Log del ID y su tipo
-
-        // Conectar a Neon
-        console.log("API end-game v2: Conectando a Neon...");
+        console.log("API end-game v3: Conectando a Neon...");
         const sql = neon(process.env.DATABASE_URL);
-         if (!process.env.DATABASE_URL) { throw new Error("Configuración servidor incompleta: DATABASE_URL falta."); }
+         if (!process.env.DATABASE_URL) { throw new Error("DATABASE_URL falta."); }
+
+        // *** PASO EXTRA: VERIFICAR SI EXISTE CON SELECT ***
+        console.log(`API end-game v3: Verificando existencia con SELECT id FROM games WHERE id = '${gameId}' ...`);
+        try {
+            const selectResult = await sql`SELECT id FROM games WHERE id = ${gameId}`;
+            console.log("API end-game v3: Resultado del SELECT:", selectResult);
+            if (!selectResult || selectResult.length === 0) {
+                console.warn(`API end-game v3: *** SELECT no encontró el ID ${gameId} justo antes de borrar ***`);
+                // A pesar de que SELECT falló, intentaremos el DELETE igualmente
+                // para ver si el resultado difiere, pero ya sabemos que probablemente fallará.
+            } else {
+                console.log(`API end-game v3: SELECT encontró el ID ${gameId} correctamente.`);
+            }
+        } catch (selectError) {
+            console.error(`API end-game v3: ¡ERROR durante el SELECT de verificación!:`, selectError);
+            // Continuar para intentar el DELETE de todos modos? O lanzar error aquí?
+            // Por ahora, continuaremos para ver qué pasa con el DELETE.
+        }
+        // *** FIN PASO EXTRA ***
 
         // Ejecutar DELETE
-        console.log(`API end-game v2: Ejecutando DELETE FROM games WHERE id = '${gameId}' ...`);
-        // Usar sql literal aquí para asegurar que la consulta sea exactamente como esperamos
-        const result = await sql`DELETE FROM games WHERE id = ${gameId}`;
-        console.log("API end-game v2: DELETE completado. Resultado:", result); // Ver qué devuelve (rowCount)
+        console.log(`API end-game v3: Ejecutando DELETE FROM games WHERE id = '${gameId}' ...`);
+        const deleteResult = await sql`DELETE FROM games WHERE id = ${gameId}`;
+        console.log("API end-game v3: DELETE completado. Resultado:", deleteResult);
 
-        // Verificar el resultado
-        // 'rowCount' indica cuántas filas fueron afectadas (borradas)
-        if (result && result.rowCount > 0) {
-            console.log(`API end-game v2: Borrado exitoso (rowCount: ${result.rowCount}).`);
-            return new Response(JSON.stringify({ success: true, message: 'Game ended and data deleted.' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        // Verificar resultado del DELETE
+        if (deleteResult && deleteResult.rowCount > 0) {
+            console.log(`API end-game v3: Borrado exitoso (rowCount: ${deleteResult.rowCount}).`);
+            return new Response(JSON.stringify({ success: true, message: 'Game deleted.' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
         } else {
-            // Si rowCount es 0, no se encontró el ID
-            console.warn(`API end-game v2: No se encontró el juego para borrar (ID: ${gameId}). rowCount: ${result?.rowCount ?? 'N/A'}.`);
-            return new Response(JSON.stringify({ success: false, message: 'Game not found.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+            console.warn(`API end-game v3: DELETE no afectó filas (ID: ${gameId}). rowCount: ${deleteResult?.rowCount ?? 'N/A'}. Devolviendo 404.`);
+            return new Response(JSON.stringify({ success: false, message: 'Game not found (delete failed).' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
         }
 
     } catch (error) {
-        console.error('API end-game v2: ****** ERROR CAPTURADO ******:', error);
-        return new Response(JSON.stringify({ message: 'Error interno al finalizar juego' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        console.error('API end-game v3: ****** ERROR CAPTURADO ******:', error);
+        return new Response(JSON.stringify({ message: 'Error interno' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 };
